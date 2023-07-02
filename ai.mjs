@@ -37,7 +37,7 @@ async function chat({ messages, temperature }) {
   const outputMessage = output.data.choices[0].message;
   console.log(outputMessage.content); /* print to stdout */
   if (!noHistory) {
-    const history = `message: ${content}\nai: ${outputMessage.content}\n`;
+    const history = `MESSAGE: ${content}\nAI: ${outputMessage.content}\n`;
     fs.appendFileSync(HISTORY_FILE, history); /* append to log file */
   }
   return outputMessage;
@@ -53,7 +53,7 @@ if (!interactive) {
     const messages = [{ role: "user", content: content }];
     await chat({ messages, interactive, temperature });
     if (!noHistory) {
-      fs.appendFileSync(HISTORY_FILE, "######## closed. ########\n\n");
+      fs.appendFileSync(HISTORY_FILE, "######## CLOSED. ########\n\n");
     }
   }
   process.exit(0);
@@ -65,7 +65,8 @@ if (!interactive) {
 const messages = [];
 if (content !== "") {
   messages.push({ role: "user", content: content });
-  await chat({ messages, interactive, temperature });
+  const result = await chat({ messages, interactive, temperature });
+  messages.push(result);
 }
 
 const rl = readline.createInterface({
@@ -82,7 +83,8 @@ rl.on("line", async (line) => {
     rl.prompt();
   }
   messages.push({ role: "user", content: line });
-  await chat({ messages, interactive, temperature });
+  const result = await chat({ messages, interactive, temperature });
+  messages.push(result);
   rl.prompt();
 }).on("close", () => {
   console.log("\nInteractive mode closed.");
