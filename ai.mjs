@@ -1,22 +1,24 @@
 #! /usr/bin/env node
 
-import "dotenv/config";
-import fs from "fs";
-import { program } from "commander";
-import readline from "readline";
+import "dotenv/config"; /* API key */
+import fs from "fs"; /* local history file */
+import { program } from "commander"; /* CLI framework */
+import readline from "readline"; /* interactive prompt */
 import { Configuration, OpenAIApi } from "openai";
 
 const MODEL = "gpt-3.5-turbo";
+const HISTORY_FILE = "history.txt";
 
 /***************/
 /* CLI OPTIONS */
 
 program
-  .argument("[message]", "the message")
+  .argument("[prompt]", "input message")
   .option("-i, --interactive", "interactive prompt", false)
-  .option("-t, --temperature <temperature>", "temperature longer longer argument", parseFloat, 1);
+  .option("-t, --temperature <temperature>", "response creativity", parseFloat, 1)
+  .option(" --no-history", "disable history");
 program.parse(process.argv);
-const { interactive, temperature } = program.opts();
+const { interactive, temperature, noHistory } = program.opts();
 const content = program.args.join(" ");
 
 /*******************/
@@ -34,8 +36,10 @@ async function chat({ messages, temperature }) {
   });
   const outputMessage = output.data.choices[0].message;
   console.log(outputMessage.content); /* print to stdout */
-  const history = `message: ${content}\nai: ${outputMessage.content}\n`;
-  fs.appendFileSync("./history.txt", history); /* append to log file */
+  if (!noHistory) {
+    const history = `message: ${content}\nai: ${outputMessage.content}\n`;
+    fs.appendFileSync(HISTORY_FILE, history); /* append to log file */
+  }
   return outputMessage;
 }
 
@@ -48,7 +52,9 @@ if (!interactive) {
   } else {
     const messages = [{ role: "user", content: content }];
     await chat({ messages, interactive, temperature });
-    fs.appendFileSync("./history.txt", "######## closed. ########\n\n");
+    if (!noHistory) {
+      fs.appendFileSync(HISTORY_FILE, "######## closed. ########\n\n");
+    }
   }
   process.exit(0);
 }
@@ -80,6 +86,8 @@ rl.on("line", async (line) => {
   rl.prompt();
 }).on("close", () => {
   console.log("\nInteractive mode closed.");
-  fs.appendFileSync("./history.txt", "######## closed. ########\n\n");
+  if (!noHistory) {
+    fs.appendFileSync(HISTORY_FILE, "######## closed. ########\n\n");
+  }
   process.exit(0);
 });
