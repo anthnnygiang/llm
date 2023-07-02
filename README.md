@@ -15,4 +15,6 @@ Simple CLI for ChatGPT.
 
 ## Future
 
-1. Locally saved chats
+- Add to path
+- Prompt colors
+- Loading spinner
