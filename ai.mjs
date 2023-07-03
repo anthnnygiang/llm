@@ -44,7 +44,7 @@ async function chat({ messages, temperature }) {
   const outputMessage = output.data.choices[0].message;
   console.log(`${chalk.green("     ai:\n")}${outputMessage.content}\n`); /* print to stdout */
   if (!noHistory) {
-    const history = `MESSAGE: ${content}\n     AI: ${outputMessage.content}\n`;
+    const history = `MESSAGE: ${content}\n     AI:\n${outputMessage.content}\n`;
     fs.appendFileSync(HISTORY_FILE, history); /* append to log file */
   }
   return outputMessage;
