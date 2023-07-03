@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
 import "dotenv/config"; /* API key */
+import os from "os"; /* home folder */
 import fs from "fs"; /* local history file */
 import { program } from "commander"; /* CLI framework */
 import readline from "readline"; /* interactive prompt */
-import chalk from 'chalk'; /* colors */
+import chalk from "chalk"; /* colors */
 import { Configuration, OpenAIApi } from "openai";
+import ora from "ora";
 
 const MODEL = "gpt-3.5-turbo";
-const HISTORY_FILE = "history.txt";
+const HISTORY_FILE = `${os.homedir}/dev/ai-cli/history.txt`;
 
 /***************/
 /* CLI OPTIONS */
@@ -21,6 +23,8 @@ program
 program.parse(process.argv);
 const { interactive, temperature, noHistory } = program.opts();
 const content = program.args.join(" ");
+const spinner = ora({ prefixText: `${chalk.green("     ai:")}`, spinner: "dots12", discardStdin: false });
+spinner.color = "blue";
 
 /*******************/
 /* NETWORK REQUEST */
@@ -30,11 +34,13 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 async function chat({ messages, temperature }) {
+  spinner.start();
   const output = await openai.createChatCompletion({
     model: MODEL,
     messages: messages,
     temperature: temperature,
   });
+  spinner.stop();
   const outputMessage = output.data.choices[0].message;
   console.log(`${chalk.green("     ai: ")}${outputMessage.content}\n`); /* print to stdout */
   if (!noHistory) {
