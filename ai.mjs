@@ -36,9 +36,9 @@ async function chat({ messages, temperature }) {
     temperature: temperature,
   });
   const outputMessage = output.data.choices[0].message;
-  console.log(`${outputMessage.content}\n`); /* print to stdout */
+  console.log(`${chalk.green("     ai: ")}${outputMessage.content}\n`); /* print to stdout */
   if (!noHistory) {
-    const history = `MESSAGE: ${content}\nAI: ${outputMessage.content}\n`;
+    const history = `MESSAGE: ${content}\n     AI: ${outputMessage.content}\n`;
     fs.appendFileSync(HISTORY_FILE, history); /* append to log file */
   }
   return outputMessage;
@@ -49,7 +49,7 @@ async function chat({ messages, temperature }) {
 
 if (!interactive) {
   if (content === "") {
-    console.log("Invalid input.");
+    console.log(`${chalk.red("error: invalid prompt")}`);
   } else {
     const messages = [{ role: "user", content: content }];
     await chat({ messages, interactive, temperature });
@@ -73,14 +73,14 @@ if (content !== "") {
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: `${chalk.yellow("message: ")}`,
+  prompt: `${chalk.cyan("message: ")}`,
 });
 
 rl.prompt();
 rl.on("line", async (line) => {
   const input = line.trim();
   if (input === "") {
-    console.log("Invalid input.");
+    console.log(`${chalk.red("error: invalid prompt")}`);
     rl.prompt();
   }
   messages.push({ role: "user", content: line });
@@ -88,7 +88,7 @@ rl.on("line", async (line) => {
   messages.push(result);
   rl.prompt();
 }).on("close", () => {
-  console.log(`\n${chalk.magenta("Interactive mode closed.")}`);
+  console.log(`\n${chalk.yellow("Interactive mode closed.")}`);
   if (!noHistory) {
     fs.appendFileSync(HISTORY_FILE, "######## CLOSED. ########\n\n");
   }
