@@ -1,5 +1,7 @@
 # AI-CLI
 
+![example](example.png)
+
 Simple CLI for ChatGPT.
 
 ## Requirements:
