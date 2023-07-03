@@ -6,8 +6,8 @@ import fs from "fs"; /* local history file */
 import { program } from "commander"; /* CLI framework */
 import readline from "readline"; /* interactive prompt */
 import chalk from "chalk"; /* colors */
+import ora from "ora"; /* loading spinner */
 import { Configuration, OpenAIApi } from "openai";
-import ora from "ora";
 
 const MODEL = "gpt-3.5-turbo";
 const HISTORY_FILE = `${os.homedir}/dev/ai-cli/history.txt`;
@@ -24,7 +24,7 @@ program.parse(process.argv);
 const { interactive, temperature, noHistory } = program.opts();
 const content = program.args.join(" ");
 const spinner = ora({ prefixText: `${chalk.green("     ai:")}`, spinner: "dots12", discardStdin: false });
-spinner.color = "blue";
+spinner.color = "green";
 
 /*******************/
 /* NETWORK REQUEST */
@@ -42,7 +42,7 @@ async function chat({ messages, temperature }) {
   });
   spinner.stop();
   const outputMessage = output.data.choices[0].message;
-  console.log(`${chalk.green("     ai: ")}${outputMessage.content}\n`); /* print to stdout */
+  console.log(`${chalk.green("     ai:\n")}${outputMessage.content}\n`); /* print to stdout */
   if (!noHistory) {
     const history = `MESSAGE: ${content}\n     AI: ${outputMessage.content}\n`;
     fs.appendFileSync(HISTORY_FILE, history); /* append to log file */
