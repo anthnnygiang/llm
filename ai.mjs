@@ -1,4 +1,4 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 
 import "dotenv/config"; /* API key */
 import fs from "fs"; /* local history file */
