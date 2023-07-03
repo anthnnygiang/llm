@@ -1,12 +1,9 @@
 {
-  "name": "chat-cli",
+  "name": "ai-cli",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {},
-  "bin": {
-    "ai": "./ai.mjs"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

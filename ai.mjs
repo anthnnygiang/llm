@@ -4,6 +4,7 @@ import "dotenv/config"; /* API key */
 import fs from "fs"; /* local history file */
 import { program } from "commander"; /* CLI framework */
 import readline from "readline"; /* interactive prompt */
+import chalk from 'chalk'; /* colors */
 import { Configuration, OpenAIApi } from "openai";
 
 const MODEL = "gpt-3.5-turbo";
@@ -35,7 +36,7 @@ async function chat({ messages, temperature }) {
     temperature: temperature,
   });
   const outputMessage = output.data.choices[0].message;
-  console.log(outputMessage.content); /* print to stdout */
+  console.log(`${outputMessage.content}\n`); /* print to stdout */
   if (!noHistory) {
     const history = `MESSAGE: ${content}\nAI: ${outputMessage.content}\n`;
     fs.appendFileSync(HISTORY_FILE, history); /* append to log file */
@@ -72,7 +73,7 @@ if (content !== "") {
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: "message: ",
+  prompt: `${chalk.yellow("message: ")}`,
 });
 
 rl.prompt();
@@ -87,9 +88,9 @@ rl.on("line", async (line) => {
   messages.push(result);
   rl.prompt();
 }).on("close", () => {
-  console.log("\nInteractive mode closed.");
+  console.log(`\n${chalk.magenta("Interactive mode closed.")}`);
   if (!noHistory) {
-    fs.appendFileSync(HISTORY_FILE, "######## closed. ########\n\n");
+    fs.appendFileSync(HISTORY_FILE, "######## CLOSED. ########\n\n");
   }
   process.exit(0);
 });
