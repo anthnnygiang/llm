@@ -12,6 +12,7 @@ import { Configuration, OpenAIApi } from "openai";
 const MODEL = "gpt-3.5-turbo";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const HISTORY_FILE = `${os.homedir}/dev/ai-cli/history.txt`;
+fs.appendFileSync(HISTORY_FILE, `   UNIX: ${new Date().getTime()}\n`); /* current time */
 
 /***************/
 /* CLI OPTIONS */
@@ -24,7 +25,11 @@ program
 program.parse(process.argv);
 const { interactive, temperature, noHistory } = program.opts();
 const content = program.args.join(" ");
-const spinner = ora({ prefixText: `${chalk.green("     ai:")}`, spinner: "dots12", discardStdin: false });
+const spinner = ora({
+  prefixText: `${chalk.green(`${interactive ? "     " : ""}ai:`)}`,
+  spinner: "dots12",
+  discardStdin: false,
+});
 spinner.color = "green";
 
 /*******************/
@@ -43,9 +48,9 @@ async function chat({ messages, temperature }) {
   });
   spinner.stop();
   const outputMessage = output.data.choices[0].message;
-  console.log(`${chalk.green("     ai:\n")}${outputMessage.content}\n`); /* print to stdout */
+  console.log(`${chalk.green(`${interactive ? "     ai: " : "ai: "}`)}${outputMessage.content}`); /* print to stdout */
   if (!noHistory) {
-    const history = `MESSAGE: ${content}\n     AI:\n${outputMessage.content}\n`;
+    const history = `MESSAGE: ${content}\n     AI: ${outputMessage.content}\n`;
     fs.appendFileSync(HISTORY_FILE, history); /* append to log file */
   }
   return outputMessage;
