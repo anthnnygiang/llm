@@ -10,6 +10,7 @@ import ora from "ora"; /* loading spinner */
 import { Configuration, OpenAIApi } from "openai";
 
 const MODEL = "gpt-3.5-turbo";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const HISTORY_FILE = `${os.homedir}/dev/ai-cli/history.txt`;
 
 /***************/
@@ -30,7 +31,7 @@ spinner.color = "green";
 /* NETWORK REQUEST */
 
 const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 async function chat({ messages, temperature }) {
@@ -60,7 +61,7 @@ if (!interactive) {
     const messages = [{ role: "user", content: content }];
     await chat({ messages, interactive, temperature });
     if (!noHistory) {
-      fs.appendFileSync(HISTORY_FILE, "######## CLOSED. ########\n\n");
+      fs.appendFileSync(HISTORY_FILE, "FINISH.\n\n");
     }
   }
   process.exit(0);
@@ -96,7 +97,7 @@ rl.on("line", async (line) => {
 }).on("close", () => {
   console.log(`\n${chalk.yellow("Interactive mode closed.")}`);
   if (!noHistory) {
-    fs.appendFileSync(HISTORY_FILE, "######## CLOSED. ########\n\n");
+    fs.appendFileSync(HISTORY_FILE, "FINISH.\n\n");
   }
   process.exit(0);
 });
