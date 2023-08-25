@@ -1,18 +1,13 @@
 #!/usr/bin/env node
 
 import "dotenv/config"; /* API key */
-import os from "os"; /* home folder */
-import fs from "fs"; /* local history file */
 import { program } from "commander"; /* CLI framework */
 import readline from "readline"; /* interactive prompt */
 import chalk from "chalk"; /* colors */
-import ora from "ora"; /* loading spinner */
-import { Configuration, OpenAIApi } from "openai";
+import { OpenAI } from "openai";
 
 const MODEL = "gpt-3.5-turbo";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const HISTORY_FILE = `${os.homedir}/dev/ai-cli/history.txt`;
-fs.appendFileSync(HISTORY_FILE, `   UNIX: ${new Date().getTime()}\n`); /* current time */
 
 /***************/
 /* CLI OPTIONS */
@@ -20,40 +15,30 @@ fs.appendFileSync(HISTORY_FILE, `   UNIX: ${new Date().getTime()}\n`); /* curren
 program
   .argument("[prompt]", "input message")
   .option("-i, --interactive", "interactive prompt", false)
-  .option("-t, --temperature <temperature>", "response creativity", parseFloat, 1)
-  .option(" --no-history", "disable history");
+  .option("-t, --temperature <temperature>", "response creativity", parseFloat, 1);
 program.parse(process.argv);
-const { interactive, temperature, noHistory } = program.opts();
+const { interactive, temperature } = program.opts();
 const content = program.args.join(" ");
-const spinner = ora({
-  prefixText: `${chalk.green(`${interactive ? "     " : ""}ai:`)}`,
-  spinner: "dots12",
-  discardStdin: false,
-});
-spinner.color = "green";
 
 /*******************/
 /* NETWORK REQUEST */
 
-const configuration = new Configuration({
-  apiKey: OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 async function chat({ messages, temperature }) {
-  spinner.start();
-  const output = await openai.createChatCompletion({
+  process.stdout.write(`${chalk.green(`${interactive ? "     ai: " : "ai: "}`)}`); /* print to stdout */
+  const completion = await openai.chat.completions.create({
     model: MODEL,
+    stream: true,
     messages: messages,
     temperature: temperature,
   });
-  spinner.stop();
-  const outputMessage = output.data.choices[0].message;
-  console.log(`${chalk.green(`${interactive ? "     ai: " : "ai: "}`)}${outputMessage.content}`); /* print to stdout */
-  if (!noHistory) {
-    const history = `MESSAGE: ${content}\n     AI: ${outputMessage.content}\n`;
-    fs.appendFileSync(HISTORY_FILE, history); /* append to log file */
+  let fullMessage = "";
+  for await (const chunk of completion) {
+    const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
+    fullMessage += completionDelta;
+    process.stdout.write(`${completionDelta}`); /* print to stdout */
   }
-  return outputMessage;
+  return fullMessage;
 }
 
 /*****************/
@@ -65,9 +50,6 @@ if (!interactive) {
   } else {
     const messages = [{ role: "user", content: content }];
     await chat({ messages, interactive, temperature });
-    if (!noHistory) {
-      fs.appendFileSync(HISTORY_FILE, "FINISH.\n\n");
-    }
   }
   process.exit(0);
 }
@@ -101,8 +83,5 @@ rl.on("line", async (line) => {
   rl.prompt();
 }).on("close", () => {
   console.log(`\n${chalk.yellow("Interactive mode closed.")}`);
-  if (!noHistory) {
-    fs.appendFileSync(HISTORY_FILE, "FINISH.\n\n");
-  }
   process.exit(0);
 });
