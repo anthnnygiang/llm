@@ -87,12 +87,12 @@ rl.prompt();
 rl.on("line", async (line) => {
   const input = line.trim();
   if (input === "") {
-    process.stdout.write(`${chalk.yellow("redo...")}\n`);
+    console.log(`${chalk.red("error: invalid prompt")}`);
   } else {
     messages.push({ role: USER_ROLE, content: line });
+    const result = await chat({ messages, interactive, temperature });
+    messages.push(result);
   }
-  const result = await chat({ messages, interactive, temperature });
-  messages.push(result);
   rl.prompt();
 }).on("close", () => {
   process.stdout.write(`\n${chalk.yellow("Interactive chat finished.")}`);
