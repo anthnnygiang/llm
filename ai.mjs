@@ -17,6 +17,14 @@ program
   .argument("[prompt]", "input message")
   .option("-i, --interactive", "interactive prompt", false)
   .option("-t, --temperature <temperature>", "response creativity", parseFloat, 1);
+program.addHelpText(
+  "after",
+  `
+Example call:
+  $ ai -i hello there
+
+To stop the interactive prompt, press Ctrl+C`
+);
 program.parse(process.argv);
 const { interactive, temperature } = program.opts();
 const content = program.args.join(" ");
@@ -26,7 +34,7 @@ const content = program.args.join(" ");
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 async function chat({ messages, temperature }) {
-  process.stdout.write(`${chalk.green(`${interactive ? "ai:\n" : "ai: "}`)}`); /* print to stdout */
+  process.stdout.write(`${chalk.green(`${"ai: "}`)}`);
   const completion = await openai.chat.completions.create({
     model: MODEL,
     stream: true,
@@ -37,7 +45,7 @@ async function chat({ messages, temperature }) {
   for await (const chunk of completion) {
     const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
     fullContent += completionDelta;
-    process.stdout.write(`${completionDelta}`); /* print to stdout */
+    process.stdout.write(`${completionDelta}`);
   }
   const message = {
     role: "assistant",
@@ -64,7 +72,7 @@ if (!interactive) {
 
 const messages = [];
 if (content !== "") {
-  messages.push({ role: USER_ROLE, content: content });
+  messages.push({ role: USER_ROLE, content: content }); /* add initial prompt */
   const result = await chat({ messages, interactive, temperature });
   messages.push(result);
 }
@@ -79,14 +87,14 @@ rl.prompt();
 rl.on("line", async (line) => {
   const input = line.trim();
   if (input === "") {
-    console.log(`${chalk.red("error: invalid prompt")}`);
-    rl.prompt();
+    process.stdout.write(`${chalk.yellow("redo...")}\n`);
+  } else {
+    messages.push({ role: USER_ROLE, content: line });
   }
-  messages.push({ role: USER_ROLE, content: line });
   const result = await chat({ messages, interactive, temperature });
   messages.push(result);
   rl.prompt();
 }).on("close", () => {
-  console.log(`\n${chalk.yellow("Interactive chat finished.")}`);
+  process.stdout.write(`\n${chalk.yellow("Interactive chat finished.")}`);
   process.exit(0);
 });
