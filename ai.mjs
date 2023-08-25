@@ -8,6 +8,7 @@ import { OpenAI } from "openai";
 
 const MODEL = "gpt-3.5-turbo";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const USER_ROLE = "user";
 
 /***************/
 /* CLI OPTIONS */
@@ -25,20 +26,24 @@ const content = program.args.join(" ");
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 async function chat({ messages, temperature }) {
-  process.stdout.write(`${chalk.green(`${interactive ? "     ai: " : "ai: "}`)}`); /* print to stdout */
+  process.stdout.write(`${chalk.green(`${interactive ? "ai:\n" : "ai: "}`)}`); /* print to stdout */
   const completion = await openai.chat.completions.create({
     model: MODEL,
     stream: true,
     messages: messages,
     temperature: temperature,
   });
-  let fullMessage = "";
+  let fullContent = "";
   for await (const chunk of completion) {
     const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
-    fullMessage += completionDelta;
+    fullContent += completionDelta;
     process.stdout.write(`${completionDelta}`); /* print to stdout */
   }
-  return fullMessage;
+  const message = {
+    role: "assistant",
+    content: fullContent,
+  };
+  return message;
 }
 
 /*****************/
@@ -48,7 +53,7 @@ if (!interactive) {
   if (content === "") {
     console.log(`${chalk.red("error: invalid prompt")}`);
   } else {
-    const messages = [{ role: "user", content: content }];
+    const messages = [{ role: USER_ROLE, content: content }];
     await chat({ messages, interactive, temperature });
   }
   process.exit(0);
@@ -59,7 +64,7 @@ if (!interactive) {
 
 const messages = [];
 if (content !== "") {
-  messages.push({ role: "user", content: content });
+  messages.push({ role: USER_ROLE, content: content });
   const result = await chat({ messages, interactive, temperature });
   messages.push(result);
 }
@@ -77,11 +82,11 @@ rl.on("line", async (line) => {
     console.log(`${chalk.red("error: invalid prompt")}`);
     rl.prompt();
   }
-  messages.push({ role: "user", content: line });
+  messages.push({ role: USER_ROLE, content: line });
   const result = await chat({ messages, interactive, temperature });
   messages.push(result);
   rl.prompt();
 }).on("close", () => {
-  console.log(`\n${chalk.yellow("Interactive mode closed.")}`);
+  console.log(`\n${chalk.yellow("Interactive chat finished.")}`);
   process.exit(0);
 });
