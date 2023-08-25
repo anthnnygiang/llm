@@ -15,7 +15,3 @@ Simple CLI for ChatGPT.
 2. Run `npm link`. This links the commands from `package.json` to your path. Run `npm ls -g` to verify.
 3. Run `export OPENAI_API_KEY="12345"`. Alternatively, add this to your `.zlogin`, or `.zshrc`, or similar.
 4. `$ ai <message>` from anywhere.
-
-## Note:
-
-- By default, the history file path is `~/dev/ai-cli/history.txt`, and can be changed in the script.
