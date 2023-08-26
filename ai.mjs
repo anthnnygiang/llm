@@ -28,38 +28,14 @@ To stop the interactive prompt, press Ctrl+C`
 program.parse(process.argv);
 const { interactive, temperature } = program.opts();
 const content = program.args.join(" ");
-
-/*******************/
-/* NETWORK REQUEST */
-
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-async function chat({ messages, temperature }) {
-  process.stdout.write(`${chalk.green(`${"ai: "}`)}`);
-  const completion = await openai.chat.completions.create({
-    model: MODEL,
-    stream: true,
-    messages: messages,
-    temperature: temperature,
-  });
-  let fullContent = "";
-  for await (const chunk of completion) {
-    const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
-    fullContent += completionDelta;
-    process.stdout.write(`${completionDelta}`);
-  }
-  const message = {
-    role: "assistant",
-    content: fullContent,
-  };
-  return message;
-}
 
 /*****************/
 /* SINGLE PROMPT */
 
 if (!interactive) {
   if (content === "") {
-    console.log(`${chalk.red("error: invalid prompt")}`);
+    process.stdout.write(`${chalk.yellow("system: invalid prompt")}\n`);
   } else {
     const messages = [{ role: USER_ROLE, content: content }];
     await chat({ messages, interactive, temperature });
@@ -86,15 +62,37 @@ const rl = readline.createInterface({
 rl.prompt();
 rl.on("line", async (line) => {
   const input = line.trim();
-  if (input === "") {
-    console.log(`${chalk.red("error: invalid prompt")}`);
-  } else {
+  if (input !== "") {
     messages.push({ role: USER_ROLE, content: line });
     const result = await chat({ messages, interactive, temperature });
     messages.push(result);
   }
   rl.prompt();
 }).on("close", () => {
-  process.stdout.write(`\n${chalk.yellow("Interactive chat finished.")}`);
+  process.stdout.write(`\n${chalk.yellow("system: interactive chat finished")}\n`);
   process.exit(0);
 });
+
+/*******************/
+/* API REQUEST */
+
+async function chat({ messages, temperature }) {
+  process.stdout.write(`${chalk.green(`${"ai: "}`)}`);
+  const completion = await openai.chat.completions.create({
+    model: MODEL,
+    stream: true,
+    messages: messages,
+    temperature: temperature,
+  });
+  let fullContent = "";
+  for await (const chunk of completion) {
+    const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
+    process.stdout.write(`${completionDelta}`);
+    fullContent += completionDelta;
+  }
+  const message = {
+    role: "assistant",
+    content: fullContent,
+  };
+  return message;
+}
