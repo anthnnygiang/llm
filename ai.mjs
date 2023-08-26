@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import "dotenv/config"; /* API key */
 import { program } from "commander"; /* CLI framework */
 import readline from "readline"; /* interactive prompt */
 import chalk from "chalk"; /* colors */
