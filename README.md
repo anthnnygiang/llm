@@ -1,6 +1,6 @@
 # AI-CLI
 
-![example](example.png)
+![example](example.gif)
 
 Simple CLI for ChatGPT.
 
