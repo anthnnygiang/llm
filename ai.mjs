@@ -55,7 +55,7 @@ if (content !== "") {
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: `${chalk.cyan("message: ")}`,
+  prompt: `${chalk.cyan("me: ")}`,
 });
 
 rl.prompt();
