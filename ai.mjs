@@ -5,7 +5,7 @@ import readline from "readline"; /* interactive prompt */
 import chalk from "chalk"; /* colors */
 import { OpenAI } from "openai";
 
-const MODEL = "gpt-3.5-turbo";
+const MODEL = "gpt-4";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 /***************/
