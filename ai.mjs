@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { program } from "commander"; /* CLI framework */
+import { Option, program } from "commander"; /* CLI framework */
 import readline from "readline"; /* interactive prompt */
 import chalk from "chalk"; /* colors */
 import { OpenAI } from "openai";
 
-const MODEL = "gpt-4";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const MODELS = ["gpt-3.5-turbo", "gpt-4"];
 
 /***************/
 /* CLI OPTIONS */
@@ -15,17 +15,20 @@ program
   .argument("[prompt]", "input message")
   .option("-i, --interactive", "interactive prompt", false)
   .option("-t, --temperature <temperature>", "response creativity", parseFloat, 1)
-  .option("-s, --system-message <message>", "modify ai behaviour");
+  .option("-s, --system-message <message>", "modify ai behaviour")
+  .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
 program.addHelpText(
   "after",
   `
-Example call:
+Example calls:
   $ ai -is "you're a pirate"
+  $ ai -im "gpt-4"
+  $ ai -t 1.5
 
 To finish the interactive prompt, press Ctrl+C`
 );
 program.parse(process.argv);
-const { interactive, temperature, systemMessage } = program.opts();
+const { interactive, model, temperature, systemMessage } = program.opts();
 const content = program.args.join(" ");
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const messages = [];
@@ -82,7 +85,7 @@ rl.on("line", async (line) => {
 async function chat({ messages, temperature }) {
   process.stdout.write(`${chalk.green(`${"ai: "}`)}`);
   const completion = await openai.chat.completions.create({
-    model: MODEL,
+    model: model,
     stream: true,
     messages: messages,
     temperature: temperature,
