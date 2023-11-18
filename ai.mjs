@@ -99,7 +99,7 @@ async function chat({ messages, temperature }) {
   });
   let fullContent = "";
   for await (const chunk of completion) {
-    const completionDelta = chunk.choices[0].delta.content ?? ""; /* there is only 1 choice */
+    const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
     process.stdout.write(`${completionDelta}`);
     fullContent += completionDelta;
   }
