@@ -13,7 +13,7 @@ const MODELS = ["gpt-3.5-turbo", "gpt-4", "gpt-4 turbo"];
 
 program
   .argument("[prompt]", "input message")
-  .option("-d, --debug", "debug log", false)
+  .option("-d, --duration", "api response duration", false)
   .option("-i, --interactive", "interactive prompt", false)
   .option("-t, --temperature <temperature>", "response creativity", parseFloat, 1)
   .option("-s, --system-message <message>", "modify ai behaviour")
@@ -29,7 +29,7 @@ Example calls:
 To finish the interactive prompt, press Ctrl+C`
 );
 program.parse(process.argv);
-const { debug, interactive, model, temperature, systemMessage } = program.opts();
+const { duration, interactive, model, temperature, systemMessage } = program.opts();
 const content = program.args.join(" ");
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const messages = [];
@@ -75,14 +75,9 @@ rl.on("line", async (line) => {
     result = await chat({ messages, interactive, temperature });
     messages.push(result);
   }
-  if (debug) {
-    console.log("\n========");
-    console.log("result:", result);
-    console.log("========");
-  }
   rl.prompt();
 }).on("close", () => {
-  process.stdout.write(`\n${chalk.yellow("system: interactive prompt finished")}\n`);
+  process.stdout.write(`\n${chalk.yellow("system:")} prompt finished\n`);
   process.exit(0);
 });
 
@@ -90,6 +85,9 @@ rl.on("line", async (line) => {
 /* API REQUEST */
 
 async function chat({ messages, temperature }) {
+  if (duration) {
+    console.time(`${chalk.yellow("system")}`);
+  }
   process.stdout.write(`${chalk.green(`${"ai: "}`)}`);
   const completion = await openai.chat.completions.create({
     model: model,
@@ -102,6 +100,9 @@ async function chat({ messages, temperature }) {
     const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
     process.stdout.write(`${completionDelta}`);
     fullContent += completionDelta;
+  }
+  if (duration) {
+    console.timeEnd(`${chalk.yellow("system")}`);
   }
   const message = {
     role: "assistant",
