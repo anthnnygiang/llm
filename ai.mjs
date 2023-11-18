@@ -6,13 +6,14 @@ import chalk from "chalk"; /* colors */
 import { OpenAI } from "openai";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODELS = ["gpt-3.5-turbo", "gpt-4"];
+const MODELS = ["gpt-3.5-turbo", "gpt-4", "gpt-4 turbo"];
 
 /***************/
 /* CLI OPTIONS */
 
 program
   .argument("[prompt]", "input message")
+  .option("-d, --debug", "debug log", false)
   .option("-i, --interactive", "interactive prompt", false)
   .option("-t, --temperature <temperature>", "response creativity", parseFloat, 1)
   .option("-s, --system-message <message>", "modify ai behaviour")
@@ -28,7 +29,7 @@ Example calls:
 To finish the interactive prompt, press Ctrl+C`
 );
 program.parse(process.argv);
-const { interactive, model, temperature, systemMessage } = program.opts();
+const { debug, interactive, model, temperature, systemMessage } = program.opts();
 const content = program.args.join(" ");
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const messages = [];
@@ -68,10 +69,16 @@ const rl = readline.createInterface({
 rl.prompt();
 rl.on("line", async (line) => {
   const content = line.trim();
+  let result;
   if (content !== "") {
     messages.push({ role: "user", content: content });
-    const result = await chat({ messages, interactive, temperature });
+    result = await chat({ messages, interactive, temperature });
     messages.push(result);
+  }
+  if (debug) {
+    console.log("\n========");
+    console.log("result:", result);
+    console.log("========");
   }
   rl.prompt();
 }).on("close", () => {
@@ -92,7 +99,7 @@ async function chat({ messages, temperature }) {
   });
   let fullContent = "";
   for await (const chunk of completion) {
-    const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
+    const completionDelta = chunk.choices[0].delta.content ?? ""; /* there is only 1 choice */
     process.stdout.write(`${completionDelta}`);
     fullContent += completionDelta;
   }
