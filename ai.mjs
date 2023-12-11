@@ -1,21 +1,20 @@
 #!/usr/bin/env node
-
-import { Option, program } from "commander"; /* CLI framework */
-import readline from "readline"; /* interactive prompt */
-import chalk from "chalk"; /* colors */
 import { OpenAI } from "openai";
+import readline from "node:readline"; /* interactive prompt */
+import { Option, program } from "commander"; /* CLI framework */
+import chalk from "chalk"; /* terminal colors */
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODELS = ["gpt-3.5-turbo", "gpt-4", "gpt-4 turbo"];
+const MODELS = ["gpt-3.5-turbo", "gpt-4"];
 
 /***************/
 /* CLI OPTIONS */
 
 program
   .argument("[prompt]", "input message")
-  .option("-d, --duration", "api response duration", false)
+  .option("-d, --duration", "API response time", false)
   .option("-i, --interactive", "interactive prompt", false)
-  .option("-t, --temperature <temperature>", "response creativity", parseFloat, 1)
+  .option("-t, --temperature <temperature>", "response creativity between [0,2]", parseFloat, 1)
   .option("-s, --system-message <message>", "modify ai behaviour")
   .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
 program.addHelpText(
@@ -26,7 +25,9 @@ Example calls:
   $ ai -im "gpt-4"
   $ ai -t 1.5
 
-To finish the interactive prompt, press Ctrl+C`
+Note:
+  - The OpenAI API response time can take as long as 30 seconds
+  - To finish the interactive prompt, press Ctrl+C`
 );
 program.parse(process.argv);
 const { duration, interactive, model, temperature, systemMessage } = program.opts();
