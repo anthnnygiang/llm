@@ -18,13 +18,15 @@ program.addHelpText(
   "after",
   `
 Usage:
+  $ ai
   .quit, .exit, to exit the prompt
   .system, to log the current system message
   .temperature, to log the current temperature
   .model, to log the current model
+  
 Note:
   - The OpenAI API response time can take as long as 30 seconds
-  - To finish the interactive prompt, type .exit, .quit, or press Ctrl+C`,
+  - To finish the interactive prompt, type .exit, .quit, or press Ctrl+C\n`,
 );
 program.parse(process.argv);
 const { model, temperature, systemMessage } = program.opts();
