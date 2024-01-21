@@ -11,55 +11,30 @@ const MODELS = ["gpt-3.5-turbo", "gpt-4"];
 /* CLI OPTIONS */
 
 program
-  .argument("[prompt]", "input message")
-  .option("-d, --duration", "API response time", false)
-  .option("-i, --interactive", "interactive prompt", false)
   .option("-t, --temperature <temperature>", "response creativity between [0,2]", parseFloat, 1)
-  .option("-s, --system-message <message>", "modify ai behaviour")
+  .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant.")
   .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
 program.addHelpText(
   "after",
   `
-Example calls:
-  $ ai -is "you're a pirate"
-  $ ai -im "gpt-4"
-  $ ai -t 1.5
-
+Usage:
+  .quit, .exit, to exit the prompt
+  .system, to log the current system message
+  .temperature, to log the current temperature
+  .model, to log the current model
 Note:
   - The OpenAI API response time can take as long as 30 seconds
-  - To finish the interactive prompt, press Ctrl+C`
+  - To finish the interactive prompt, type .exit, .quit, or press Ctrl+C`,
 );
 program.parse(process.argv);
-const { duration, interactive, model, temperature, systemMessage } = program.opts();
-const content = program.args.join(" ");
+const { model, temperature, systemMessage } = program.opts();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-const messages = [];
-if (systemMessage) {
-  /* Add system message */
-  messages.push({ role: "system", content: systemMessage });
-}
-
-/*****************/
-/* SINGLE PROMPT */
-
-if (!interactive) {
-  if (content === "") {
-    process.stdout.write(`${chalk.yellow("system: invalid prompt")}\n`);
-  } else {
-    messages.push({ role: "user", content: content });
-    await chat({ messages, interactive, temperature });
-  }
-  process.exit(0);
-}
+const history = [];
+/* Add system message */
+history.push({ role: "system", content: systemMessage });
 
 /**********************/
 /* INTERACTIVE PROMPT */
-
-if (content !== "") {
-  messages.push({ role: "user", content: content }); /* add initial prompt */
-  const result = await chat({ messages, interactive, temperature });
-  messages.push(result);
-}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -69,12 +44,34 @@ const rl = readline.createInterface({
 
 rl.prompt();
 rl.on("line", async (line) => {
-  const content = line.trim();
-  let result;
-  if (content !== "") {
-    messages.push({ role: "user", content: content });
-    result = await chat({ messages, interactive, temperature });
-    messages.push(result);
+  switch (line.trim()) {
+    case ".exit":
+    case ".quit":
+      /* exit prompt */
+      process.stdout.write(`${chalk.yellow("system:")} prompt finished\n`);
+      process.exit(0);
+      break;
+    case ".system":
+      /* log current message */
+      process.stdout.write(`${chalk.yellow("system:")} ${systemMessage}\n`);
+      break;
+    case ".temperature":
+      /* log current temperature */
+      process.stdout.write(`${chalk.yellow("system:")} ${temperature}\n`);
+      break;
+    case ".model":
+      /* log current model */
+      process.stdout.write(`${chalk.yellow("system:")} ${model}\n`);
+      break;
+    case "":
+      /* empty line */
+      break;
+    default:
+      /* chat */
+      history.push({ role: "user", content: line.trim() });
+      const result = await chat({ history, temperature });
+      history.push(result);
+      break;
   }
   rl.prompt();
 }).on("close", () => {
@@ -85,15 +82,12 @@ rl.on("line", async (line) => {
 /*******************/
 /* API REQUEST */
 
-async function chat({ messages, temperature }) {
-  if (duration) {
-    console.time(`${chalk.yellow("system")}`);
-  }
+async function chat({ history, temperature }) {
   process.stdout.write(`${chalk.green(`${"ai: "}`)}`);
   const completion = await openai.chat.completions.create({
     model: model,
     stream: true,
-    messages: messages,
+    messages: history,
     temperature: temperature,
   });
   let fullContent = "";
@@ -102,12 +96,8 @@ async function chat({ messages, temperature }) {
     process.stdout.write(`${completionDelta}`);
     fullContent += completionDelta;
   }
-  if (duration) {
-    console.timeEnd(`${chalk.yellow("system")}`);
-  }
-  const message = {
+  return {
     role: "assistant",
     content: fullContent,
   };
-  return message;
 }
