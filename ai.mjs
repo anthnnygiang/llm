@@ -19,7 +19,7 @@ program.addHelpText(
   `
 Usage:
   $ ai
-  .exit, to exit the prompt
+  .exit/quit, to quit the prompt
   .system, to log the current system message
   .temperature, to log the current temperature
   .model, to log the current model
