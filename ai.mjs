@@ -13,7 +13,7 @@ const MODELS = ["gpt-3.5-turbo", "gpt-4"];
 program
   .option("-t, --temperature <temperature>", "response creativity between [0,2]", parseFloat, 1)
   .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant.")
-  .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
+  .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[1]));
 program.addHelpText(
   "after",
   `
