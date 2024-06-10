@@ -53,6 +53,10 @@ rl.on("line", async (line) => {
       process.stdout.write(`${chalk.yellow("system:")} prompt finished\n`);
       process.exit(0);
       break;
+    case ".help":
+      /* show help */
+      process.stdout.write(program.helpInformation());
+      break;
     case ".system":
       /* log current message */
       process.stdout.write(`${chalk.yellow("system:")} ${systemMessage}\n`);
@@ -85,7 +89,7 @@ rl.on("line", async (line) => {
 /* API REQUEST */
 
 async function chat({ history, temperature }) {
-  process.stdout.write(`${chalk.green(`${"ai: "}`)}`);
+  process.stdout.write(`${chalk.green(`ai: `)}`);
   const completion = await openai.chat.completions.create({
     model: model,
     stream: true,
