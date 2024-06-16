@@ -88,7 +88,8 @@ rl.on("line", async (line) => {
       break;
     case ".bill":
       /* open billing page */
-      child_process.exec(`${platformCommands[platform]} ${usageURL}`);
+      child_process.exec(`${platformCommands[platform]} ${usageURL}\n`);
+      break;
     case "":
       /* empty line */
       break;
