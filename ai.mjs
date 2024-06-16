@@ -12,23 +12,27 @@ const MODELS = ["gpt-4o", "gpt-4", "gpt-3.5-turbo"];
 /* CLI OPTIONS */
 
 program
-  .option("-t, --temperature <temperature>", "response creativity between [0,2]", parseFloat, 1)
+  .option("-t, --temperature <temperature>", "response creativity, between [0,2]", parseFloat, 1)
   .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant.")
   .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
 program.addHelpText(
   "after",
   `
 Usage:
-  $ ai
-  .exit/quit, to quit the prompt
-  .system, to log the current system message
-  .temperature, to log the current temperature
-  .model, to log the current model
+  $ ai 
+  .exit/quit    quit the prompt gracefully
+  .system       log the current system message
+  .temperature  log the current temperature
+  .model        log the current model
+  .bill         open browser to "https://platform.openai.com/usage"
+  .help         show this help message
   
 Notes:
   - The OpenAI API response time can take as long as 30 seconds
-  - To finish the interactive prompt, type .exit, .quit, or press Ctrl+C\n`,
+  `,
 );
+program.showHelpAfterError();
+
 program.parse(process.argv);
 const { model, temperature, systemMessage } = program.opts();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
@@ -68,7 +72,7 @@ rl.on("line", async (line) => {
       break;
     case ".help":
       /* show help */
-      process.stdout.write(program.helpInformation());
+      program.outputHelp();
       break;
     case ".system":
       /* log current message */
