@@ -3,6 +3,7 @@ import { OpenAI } from "openai";
 import readline from "node:readline"; /* interactive prompt */
 import { Option, program } from "commander"; /* CLI framework */
 import chalk from "chalk"; /* terminal colors */
+import child_process from "node:child_process";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const MODELS = ["gpt-4o", "gpt-4", "gpt-3.5-turbo"];
@@ -34,6 +35,18 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const history = [];
 /* Add system message */
 history.push({ role: "system", content: systemMessage });
+/* Billing */
+const platform = process.platform;
+const usageURL = "https://platform.openai.com/usage";
+const platformCommands = {
+  win32: "start",
+  darwin: "open",
+  linux: "xdg-open",
+};
+if (!platformCommands[platform]) {
+  console.error("Unsupported platform!");
+  process.exit(1);
+}
 
 /**********************/
 /* INTERACTIVE PROMPT */
@@ -69,6 +82,9 @@ rl.on("line", async (line) => {
       /* log current model */
       process.stdout.write(`${chalk.yellow("system:")} ${model}\n`);
       break;
+    case ".bill":
+      /* open billing page */
+      child_process.exec(`${platformCommands[platform]} ${usageURL}`);
     case "":
       /* empty line */
       break;
@@ -86,6 +102,7 @@ rl.on("line", async (line) => {
 });
 
 /*******************/
+
 /* API REQUEST */
 
 async function chat({ history, temperature }) {
