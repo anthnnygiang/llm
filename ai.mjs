@@ -13,7 +13,7 @@ const MODELS = ["gpt-4o", "gpt-4", "gpt-3.5-turbo"];
 
 program
   .option("-t, --temperature <temperature>", "response creativity, between [0,2]", parseFloat, 1)
-  .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant.")
+  .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant. Answer succinctly.")
   .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
 program.addHelpText(
   "after",
@@ -24,6 +24,7 @@ Usage:
   .system       log the current system message
   .temperature  log the current temperature
   .model        log the current model
+  .new          clear history
   .bill         open browser to "https://platform.openai.com/usage"
   .help         show this help message
   
@@ -85,6 +86,11 @@ rl.on("line", async (line) => {
     case ".model":
       /* log current model */
       process.stdout.write(`${chalk.yellow("system:")} ${model}\n`);
+      break;
+    case ".new":
+      /* clear history */
+      history.splice(1); /* keep the system message */
+      process.stdout.write(`${chalk.yellow("system:")} cleared history\n`);
       break;
     case ".bill":
       /* open billing page */
