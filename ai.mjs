@@ -113,7 +113,6 @@ rl.on("line", async (line) => {
 });
 
 /*******************/
-
 /* API REQUEST */
 
 async function chat({ history, temperature }) {
