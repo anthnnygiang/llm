@@ -6,7 +6,7 @@ import chalk from "chalk"; /* terminal colors */
 import child_process from "node:child_process";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODELS = ["gpt-4o", "gpt-4", "gpt-3.5-turbo"];
+const MODELS = ["o1-mini", "gpt-4o"];
 
 /***************/
 /* CLI OPTIONS */
@@ -35,11 +35,13 @@ Notes:
 program.showHelpAfterError();
 
 program.parse(process.argv);
-const { model, temperature, systemMessage } = program.opts();
+let { model, temperature, systemMessage } = program.opts();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const history = [];
-/* Add system message */
-history.push({ role: "system", content: systemMessage });
+/* Add system message if GPT model */
+if (model.startsWith("gpt")) {
+  history.push({ role: "system", content: systemMessage });
+}
 /* Billing */
 const platform = process.platform;
 const usageURL = "https://platform.openai.com/usage";
@@ -85,7 +87,15 @@ rl.on("line", async (line) => {
       break;
     case ".model":
       /* log current model */
-      process.stdout.write(`${chalk.yellow("system:")} ${model}\n`);
+      process.stdout.write(`${chalk.yellow("system:")} current [${model}], available [${MODELS}]\n`);
+      break;
+    case `.model ${MODELS[0]}`:
+      model = MODELS[0];
+      process.stdout.write(`${chalk.yellow("system:")} current [${model}]\n`);
+      break;
+    case `.model ${MODELS[1]}`:
+      model = MODELS[1];
+      process.stdout.write(`${chalk.yellow("system:")} current [${model}]\n`);
       break;
     case ".new":
       /* clear history */
