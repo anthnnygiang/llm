@@ -6,7 +6,7 @@ import chalk from "chalk"; /* terminal colors */
 import child_process from "node:child_process";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODELS = ["o1-mini", "gpt-4o"];
+const MODELS = ["gpt-4o", "o1-mini"];
 
 /***************/
 /* CLI OPTIONS */
@@ -90,11 +90,12 @@ rl.on("line", async (line) => {
       process.stdout.write(`${chalk.yellow("system:")} current [${model}], available [${MODELS}]\n`);
       break;
     case `.model ${MODELS[0]}`:
-      model = MODELS[0];
+      model = MODELS[0]; /* gpt-4o */
+      history.push({ role: "system", content: systemMessage });
       process.stdout.write(`${chalk.yellow("system:")} current [${model}]\n`);
       break;
     case `.model ${MODELS[1]}`:
-      model = MODELS[1];
+      model = MODELS[1]; /* o1-mini */
       process.stdout.write(`${chalk.yellow("system:")} current [${model}]\n`);
       break;
     case ".new":
