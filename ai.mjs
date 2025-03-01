@@ -4,15 +4,14 @@ import { OpenAI } from "openai";
 import readline from "node:readline"; /* interactive prompt */
 import { Option, program } from "commander"; /* CLI framework */
 import chalk from "chalk"; /* terminal colors */
-import child_process from "node:child_process";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODELS = ["claude-3-7-sonnet-latest", "gpt-4o"];
-const MODEL_PROVIDER = {
-  [MODELS[0]]: "anthropic",
-  [MODELS[1]]: "openai",
+const MODEL_PROVIDERS = {
+  "claude-sonnet-3-7": "anthropic",
+  "gpt-4o": "openai",
 };
+const MODELS = Object.keys(MODEL_PROVIDERS);
 
 /***************/
 /* cli options */
@@ -83,9 +82,9 @@ rl.on("line", async (line) => {
       break;
     case ".new":
       /* clear history */
-      if (MODEL_PROVIDER[model] === "anthropic") {
+      if (MODEL_PROVIDERS[model] === "anthropic") {
         history.splice(0);
-      } else if (MODEL_PROVIDER[model] === "openai") {
+      } else if (MODEL_PROVIDERS[model] === "openai") {
         history.splice(0);
         history.push({ role: "system", content: systemMessage }); /* add the system message */
       } else {
@@ -102,9 +101,9 @@ rl.on("line", async (line) => {
       history.push({ role: "user", content: line.trim() });
 
       let result;
-      if (MODEL_PROVIDER[model] === "anthropic") {
+      if (MODEL_PROVIDERS[model] === "anthropic") {
         result = await AnthropicChat({ history, temperature });
-      } else if (MODEL_PROVIDER[model] === "openai") {
+      } else if (MODEL_PROVIDERS[model] === "openai") {
         result = await OpenAIChat({ history, temperature });
       } else {
         process.stdout.write(`${chalk.yellow("system:")} model error`);
