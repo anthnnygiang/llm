@@ -2,11 +2,12 @@
 
 ![example](example.gif)
 
-Simple CLI for ChatGPT.
+Simple LLM CLI.
 
 ## Requirements:
 
 - Node version >= `18`
+- Anthropic API key
 - OpenAI API key
 
 ## Usage: 
@@ -15,7 +16,8 @@ Simple CLI for ChatGPT.
 2. Run `npm link`. This links the commands from `package.json` to your path.`, To verify, if using [Volta](https://volta.sh/), run `volta list`.
    Any code changes are automatically reflected as it is a symlinked, so there is no need to reinstall.
 3. Add `export OPENAI_API_KEY="12345"`, to your `.zlogin`, `.zshrc`, or similar.
-4. `$ ai <message>` from anywhere.
+4. Add `export ANTHROPIC_API_KEY="12345"` to your `.zlogin`, `.zshrc`, or similar. 
+5. `$ ai <message>` from anywhere.
 
 OR
 

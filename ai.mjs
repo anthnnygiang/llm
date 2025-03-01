@@ -1,15 +1,21 @@
 #!/usr/bin/env node
+import { Anthropic } from "@anthropic-ai/sdk";
 import { OpenAI } from "openai";
 import readline from "node:readline"; /* interactive prompt */
 import { Option, program } from "commander"; /* CLI framework */
 import chalk from "chalk"; /* terminal colors */
 import child_process from "node:child_process";
 
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODELS = ["gpt-4o", "o1-mini"];
+const MODELS = ["claude-3-7-sonnet-latest", "gpt-4o"];
+const MODEL_PROVIDER = {
+  [MODELS[0]]: "anthropic",
+  [MODELS[1]]: "openai",
+};
 
 /***************/
-/* CLI OPTIONS */
+/* cli options */
 
 program
   .option("-t, --temperature <temperature>", "response creativity, between [0,2]", parseFloat, 1)
@@ -25,7 +31,6 @@ Usage:
   .temperature  log the current temperature
   .model        log the current model
   .new          clear history
-  .bill         open browser to "https://platform.openai.com/usage"
   .help         show this help message
   
 Notes:
@@ -33,30 +38,17 @@ Notes:
   `,
 );
 program.showHelpAfterError();
-
 program.parse(process.argv);
 let { model, temperature, systemMessage } = program.opts();
+
+/* model providers */
+const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+
 const history = [];
-/* Add system message if GPT model */
-if (model.startsWith("gpt")) {
-  history.push({ role: "system", content: systemMessage });
-}
-/* Billing */
-const platform = process.platform;
-const usageURL = "https://platform.openai.com/usage";
-const platformCommands = {
-  win32: "start",
-  darwin: "open",
-  linux: "xdg-open",
-};
-if (!platformCommands[platform]) {
-  console.error("Unsupported platform!");
-  process.exit(1);
-}
 
 /**********************/
-/* INTERACTIVE PROMPT */
+/* interactive prompt */
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -89,23 +81,18 @@ rl.on("line", async (line) => {
       /* log current model */
       process.stdout.write(`${chalk.yellow("system:")} current [${model}], available [${MODELS}]\n`);
       break;
-    case `.model ${MODELS[0]}`:
-      model = MODELS[0]; /* gpt-4o */
-      history.push({ role: "system", content: systemMessage });
-      process.stdout.write(`${chalk.yellow("system:")} current [${model}]\n`);
-      break;
-    case `.model ${MODELS[1]}`:
-      model = MODELS[1]; /* o1-mini */
-      process.stdout.write(`${chalk.yellow("system:")} current [${model}]\n`);
-      break;
     case ".new":
       /* clear history */
-      history.splice(1); /* keep the system message */
+      if (MODEL_PROVIDER[model] === "anthropic") {
+        history.splice(0);
+      } else if (MODEL_PROVIDER[model] === "openai") {
+        history.splice(0);
+        history.push({ role: "system", content: systemMessage }); /* add the system message */
+      } else {
+        process.stdout.write(`${chalk.yellow("system:")} model error`);
+        process.exit(1);
+      }
       process.stdout.write(`${chalk.yellow("system:")} cleared history\n`);
-      break;
-    case ".bill":
-      /* open billing page */
-      child_process.exec(`${platformCommands[platform]} ${usageURL}\n`);
       break;
     case "":
       /* empty line */
@@ -113,7 +100,16 @@ rl.on("line", async (line) => {
     default:
       /* chat */
       history.push({ role: "user", content: line.trim() });
-      const result = await chat({ history, temperature });
+
+      let result;
+      if (MODEL_PROVIDER[model] === "anthropic") {
+        result = await AnthropicChat({ history, temperature });
+      } else if (MODEL_PROVIDER[model] === "openai") {
+        result = await OpenAIChat({ history, temperature });
+      } else {
+        process.stdout.write(`${chalk.yellow("system:")} model error`);
+        process.exit(1);
+      }
       history.push(result);
       break;
   }
@@ -123,11 +119,36 @@ rl.on("line", async (line) => {
   process.exit(0);
 });
 
-/*******************/
-/* API REQUEST */
+/*************************/
+/* anthropic api request */
 
-async function chat({ history, temperature }) {
+async function AnthropicChat({ history, temperature }) {
+  const message = await anthropic.messages.stream({
+    model: model,
+    temperature: temperature,
+    max_tokens: 1024,
+    system: systemMessage,
+    messages: history,
+  });
+  let fullMessage = "";
+  for await (const chunk of message) {
+    const messageDelta = chunk.delta?.text ?? "";
+    process.stdout.write(`${messageDelta}`);
+    fullMessage += messageDelta;
+  }
+  process.stdout.write("\n");
+  return {
+    role: "assistant",
+    content: fullMessage,
+  };
+}
+
+/**********************/
+/* openai api request */
+
+async function OpenAIChat({ history, temperature }) {
   process.stdout.write(`${chalk.green(`ai: `)}`);
+  history.push({ role: "system", content: systemMessage }); /* add the system message */
   const completion = await openai.chat.completions.create({
     model: model,
     stream: true,
