@@ -7,11 +7,7 @@ import chalk from "chalk"; /* terminal colors */
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODEL_PROVIDERS = {
-  "claude-3-7-sonnet-latest": "anthropic",
-  "gpt-4o": "openai",
-};
-const MODELS = Object.keys(MODEL_PROVIDERS);
+const MODELS = ["claude-3-7-sonnet-latest", "gpt-4o", "o3-mini"];
 
 /***************/
 /* cli options */
@@ -45,6 +41,7 @@ const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const history = [];
+initialize();
 
 /**********************/
 /* interactive prompt */
@@ -83,15 +80,7 @@ rl.on("line", async (line) => {
       break;
     case ".new":
       /* clear history */
-      if (MODEL_PROVIDERS[model] === "anthropic") {
-        history.splice(0);
-      } else if (MODEL_PROVIDERS[model] === "openai") {
-        history.splice(0);
-        history.push({ role: "system", content: systemMessage }); /* add the system message */
-      } else {
-        process.stdout.write(`${chalk.yellow("system:")} model error`);
-        process.exit(1);
-      }
+      initialize();
       process.stdout.write(`${chalk.yellow("system:")} cleared history\n`);
       break;
     case "":
@@ -109,6 +98,26 @@ rl.on("line", async (line) => {
   process.stdout.write(`\n${chalk.yellow("system:")} prompt finished\n`);
   process.exit(0);
 });
+
+/**********************/
+/* initialize history */
+
+function initialize() {
+  switch (model) {
+    case MODELS[0]:
+      /* claude-3-7-sonnet-latest */
+      history.splice(0);
+      break;
+    case MODELS[1]:
+      /* gpt-4o */
+      history.push({ role: "system", content: systemMessage }); /* add the system message */
+      history.splice(0);
+      break;
+    default:
+      process.stdout.write(`${chalk.yellow("system:")} model error`);
+      process.exit(1);
+  }
+}
 
 /********/
 /* chat */
@@ -156,7 +165,6 @@ async function AnthropicChat() {
 
 async function OpenAIChat() {
   process.stdout.write(`${chalk.green(`ai: `)}`);
-  history.push({ role: "system", content: systemMessage }); /* add the system message */
   const completion = await openai.chat.completions.create({
     model: model,
     stream: true,
