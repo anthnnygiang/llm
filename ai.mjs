@@ -8,7 +8,7 @@ import chalk from "chalk"; /* terminal colors */
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const MODEL_PROVIDERS = {
-  "claude-sonnet-3-7": "anthropic",
+  "claude-3-7-sonnet-latest": "anthropic",
   "gpt-4o": "openai",
 };
 const MODELS = Object.keys(MODEL_PROVIDERS);
@@ -78,7 +78,8 @@ rl.on("line", async (line) => {
       break;
     case ".model":
       /* log current model */
-      process.stdout.write(`${chalk.yellow("system:")} current [${model}], available [${MODELS}]\n`);
+      process.stdout.write(`${chalk.yellow("system:")} current ${JSON.stringify(model)}\n`);
+      process.stdout.write(`${chalk.yellow("system:")} available ${JSON.stringify(MODELS)}\n`);
       break;
     case ".new":
       /* clear history */
@@ -99,16 +100,7 @@ rl.on("line", async (line) => {
     default:
       /* chat */
       history.push({ role: "user", content: line.trim() });
-
-      let result;
-      if (MODEL_PROVIDERS[model] === "anthropic") {
-        result = await AnthropicChat({ history, temperature });
-      } else if (MODEL_PROVIDERS[model] === "openai") {
-        result = await OpenAIChat({ history, temperature });
-      } else {
-        process.stdout.write(`${chalk.yellow("system:")} model error`);
-        process.exit(1);
-      }
+      const result = await chat();
       history.push(result);
       break;
   }
@@ -118,10 +110,27 @@ rl.on("line", async (line) => {
   process.exit(0);
 });
 
+/********/
+/* chat */
+
+async function chat() {
+  switch (model) {
+    case MODELS[0]:
+      /* claude-3-7-sonnet-latest */
+      return await AnthropicChat();
+    case MODELS[1]:
+      /* gpt-4o */
+      return await OpenAIChat();
+    default:
+      process.stdout.write(`${chalk.yellow("system:")} model error`);
+      process.exit(1);
+  }
+}
+
 /*************************/
 /* anthropic api request */
 
-async function AnthropicChat({ history, temperature }) {
+async function AnthropicChat() {
   const message = await anthropic.messages.stream({
     model: model,
     temperature: temperature,
@@ -145,7 +154,7 @@ async function AnthropicChat({ history, temperature }) {
 /**********************/
 /* openai api request */
 
-async function OpenAIChat({ history, temperature }) {
+async function OpenAIChat() {
   process.stdout.write(`${chalk.green(`ai: `)}`);
   history.push({ role: "system", content: systemMessage }); /* add the system message */
   const completion = await openai.chat.completions.create({
