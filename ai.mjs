@@ -113,6 +113,11 @@ function initialize() {
       history.push({ role: "system", content: systemMessage }); /* add the system message */
       history.splice(0);
       break;
+    case MODELS[2]:
+      /* o3-mini */
+      history.push({ role: "system", content: systemMessage }); /* add the system message */
+      history.splice(0);
+      break;
     default:
       process.stdout.write(`${chalk.yellow("system:")} model error`);
       process.exit(1);
@@ -129,6 +134,9 @@ async function chat() {
       return await AnthropicChat();
     case MODELS[1]:
       /* gpt-4o */
+      return await OpenAIChat();
+    case MODELS[2]:
+      /* o3-mini */
       return await OpenAIChat();
     default:
       process.stdout.write(`${chalk.yellow("system:")} model error`);
