@@ -7,7 +7,7 @@ import chalk from "chalk"; /* terminal colors */
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODELS = ["claude-3-7-sonnet-latest", "gpt-4o", "o3-mini"];
+const MODELS = ["claude-3-7-sonnet-latest", "o4-mini"];
 
 /***************/
 /* cli options */
@@ -15,7 +15,7 @@ const MODELS = ["claude-3-7-sonnet-latest", "gpt-4o", "o3-mini"];
 program
   .option("-t, --temperature <temperature>", "response creativity, between [0,2]", parseFloat, 1)
   .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant. Answer succinctly.")
-  .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
+  .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[1]));
 program.addHelpText(
   "after",
   `
@@ -27,9 +27,6 @@ Usage:
   .model        log the current model
   .new          clear history
   .help         show this help message
-  
-Notes:
-  - The OpenAI API response time can take as long as 30 seconds
   `,
 );
 program.showHelpAfterError();
