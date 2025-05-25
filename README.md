@@ -6,7 +6,7 @@ Simple LLM CLI.
 
 ## Requirements:
 
-- Node version >= `18`
+- Node version >= `20`
 - Anthropic API key
 - OpenAI API key
 
