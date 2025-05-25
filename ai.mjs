@@ -83,6 +83,16 @@ rl.on("line", async (line) => {
       /* empty line */
       break;
     default:
+      /* use any prompt templates if specified */
+      const explainRgx = /^\.explain\s+(.+)$/; /* starts with .explain */
+      switch (true) {
+        case explainRgx.test(line):
+          /* explain a topic */
+          const match = line.match(explainRgx);
+          line = `Explain "${match[1]}" in detail. Provide an in-depth overview including: key concepts, historical context, relevant examples, and lastly further reading topics.`;
+          break;
+      }
+
       /* chat */
       history.push({ role: "user", content: line.trim() });
       const result = await chat();
