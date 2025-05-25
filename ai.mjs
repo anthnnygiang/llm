@@ -56,7 +56,7 @@ rl.on("line", async (line) => {
     case ".quit":
       /* exit prompt */
       process.stdout.write(`${chalk.yellow("system:")} prompt finished\n`);
-      process.exit(0);
+      rl.close();
     case ".help":
       /* show help */
       program.outputHelp();
@@ -101,8 +101,8 @@ rl.on("line", async (line) => {
 function initialize() {
   switch (model) {
     case MODELS[0] /* openai */:
-      history.push({ role: "system", content: systemMessage }); /* add the system message */
       history.splice(0);
+      history.push({ role: "system", content: systemMessage }); /* add the system message */
       break;
     case MODELS[1] /* anthropic */:
       history.splice(0);
@@ -117,6 +117,7 @@ function initialize() {
 /* chat */
 
 async function chat() {
+  process.stdout.write(`${chalk.green(`ai: `)}`);
   switch (model) {
     case MODELS[0] /* openai */:
       return await OpenAIChat();
@@ -132,7 +133,6 @@ async function chat() {
 /* openai api request */
 
 async function OpenAIChat() {
-  process.stdout.write(`${chalk.green(`ai: `)}`);
   const completion = await openai.chat.completions.create({
     model: model,
     stream: true,
