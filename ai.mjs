@@ -21,12 +21,13 @@ program.addHelpText(
   `
 Usage:
   $ ai
-  .exit/quit    quit the prompt gracefully
-  .system       log the current system message
-  .temperature  log the current temperature
-  .model        log the current model
-  .new          clear history
-  .help         show this help message
+  .exit/quit        quit the prompt gracefully
+  .system           log the current system message
+  .temperature      log the current temperature
+  .model            log the current model
+  .new              clear history
+  .explain <topic>  explain a topic in detail
+  .help             show this help message
   `,
 );
 program.showHelpAfterError();
