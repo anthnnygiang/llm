@@ -27,6 +27,7 @@ Usage:
   .model            log the current model
   .new              clear history
   .explain <topic>  explain a topic in detail
+  .howto <task>     describe how to do a task step-by-step
   .help             show this help message
   `,
 );
