@@ -17,7 +17,7 @@ Simple LLM CLI.
    Any code changes are automatically reflected as it is a symlinked, so there is no need to reinstall.
 3. Add `export OPENAI_CLI="12345"`, to your `.zlogin`, `.zshrc`, or similar.
 4. Add `export ANTHROPIC_CLI="12345"` to your `.zlogin`, `.zshrc`, or similar.
-5. `$ ai <message>` from anywhere.
+5. `$ ai` from anywhere.
 
 OR
 

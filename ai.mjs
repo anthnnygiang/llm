@@ -86,11 +86,17 @@ rl.on("line", async (line) => {
     default:
       /* use any prompt templates if specified */
       const explainRgx = /^\.explain\s+(.+)$/; /* starts with .explain */
+      const howToRgx = /^\.howto\s+(.+)$/; /* starts with .howto */
       switch (true) {
         case explainRgx.test(line):
           /* explain a topic */
-          const match = line.match(explainRgx);
-          line = `Explain "${match[1]}" in detail. Provide an in-depth overview including: key concepts, historical context, relevant examples, and lastly further reading topics.`;
+          const explainMatch = line.match(explainRgx);
+          line = `Explain "${explainMatch[1]}" in detail. Provide an in-depth overview including: key concepts, historical context, relevant examples, and lastly further reading topics.`;
+          break;
+        case howToRgx.test(line):
+          /* how to do task */
+          const howToMatch = line.match(howToRgx);
+          line = `How to "${howToMatch[1]}"? Provide a step-by-step guide with detailed instructions. Note any prerequisites and common pitfalls.`;
           break;
       }
 
