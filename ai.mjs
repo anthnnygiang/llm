@@ -42,6 +42,7 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
 const history = [];
+let minHistory = -1; /* history must be longer than minHistory to copy to clipboard */
 initialize();
 
 /**********************/
@@ -52,9 +53,11 @@ function initialize() {
     case MODELS[0] /* openai */:
       history.splice(0);
       history.push({ role: "system", content: systemMessage }); /* add the system message */
+      minHistory = 1; /* openai requires at least 1 message in history */
       break;
     case MODELS[1] /* anthropic */:
       history.splice(0);
+      minHistory = 0; /* anthropic does not require a system message */
       break;
     default:
       process.stdout.write(`${chalk.yellow("system:")} model error`);
@@ -78,6 +81,9 @@ rl.on("line", async (line) => {
     case ".quit":
       process.stdout.write(`${chalk.yellow("system:")} prompt finished\n`);
       process.exit(0);
+    case "":
+      /* empty line */
+      break;
     case ".help":
       /* show help */
       program.outputHelp();
@@ -97,6 +103,10 @@ rl.on("line", async (line) => {
       break;
     case ".out":
       /* output latest response to clipboard */
+      if (history.length <= minHistory) {
+        process.stdout.write(`${chalk.yellow("system:")} could not copy to clipboard \n`);
+        break;
+      }
       const latestResponse = history[history.length - 1].content;
       switch (os.platform()) {
         case "darwin" /* macOS */:
@@ -111,14 +121,12 @@ rl.on("line", async (line) => {
         default:
           process.stdout.write(`${chalk.yellow("system:")} unsupported platform\n`);
       }
+      process.stdout.write(`${chalk.yellow("system:")} copied to clipboard\n`);
       break;
     case ".new":
       /* clear history */
       initialize();
       process.stdout.write(`${chalk.yellow("system:")} cleared history\n`);
-      break;
-    case "":
-      /* empty line */
       break;
     default:
       /* use any prompt templates if specified */
