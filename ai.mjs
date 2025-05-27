@@ -56,7 +56,8 @@ rl.on("line", async (line) => {
   switch (line.trim()) {
     case ".exit":
     case ".quit":
-      rl.close();
+      process.stdout.write(`\n${chalk.yellow("system:")} prompt finished\n`);
+      process.exit(0);
     case ".help":
       /* show help */
       program.outputHelp();
@@ -107,6 +108,7 @@ rl.on("line", async (line) => {
   }
   rl.prompt();
 }).on("close", () => {
+  /* ctrl-c/d */
   process.stdout.write(`\n${chalk.yellow("system:")} prompt finished\n`);
   process.exit(0);
 });
