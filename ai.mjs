@@ -7,7 +7,7 @@ import chalk from "chalk"; /* terminal colors */
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_CLI;
 const OPENAI_API_KEY = process.env.OPENAI_CLI;
-const MODELS = ["o4-mini", "claude-3-7-sonnet-latest"];
+const MODELS = ["o4-mini", "claude-3-7-sonnet-latest"]; /* optimal model from each provider */
 
 /***************/
 /* cli options */
@@ -43,6 +43,24 @@ const history = [];
 initialize();
 
 /**********************/
+/* initialize history */
+
+function initialize() {
+  switch (model) {
+    case MODELS[0] /* openai */:
+      history.splice(0);
+      history.push({ role: "system", content: systemMessage }); /* add the system message */
+      break;
+    case MODELS[1] /* anthropic */:
+      history.splice(0);
+      break;
+    default:
+      process.stdout.write(`${chalk.yellow("system:")} model error`);
+      process.exit(1);
+  }
+}
+
+/**********************/
 /* interactive prompt */
 
 const rl = readline.createInterface({
@@ -56,7 +74,7 @@ rl.on("line", async (line) => {
   switch (line.trim()) {
     case ".exit":
     case ".quit":
-      process.stdout.write(`\n${chalk.yellow("system:")} prompt finished\n`);
+      process.stdout.write(`${chalk.yellow("system:")} prompt finished\n`);
       process.exit(0);
     case ".help":
       /* show help */
@@ -112,24 +130,6 @@ rl.on("line", async (line) => {
   process.stdout.write(`\n${chalk.yellow("system:")} prompt finished\n`);
   process.exit(0);
 });
-
-/**********************/
-/* initialize history */
-
-function initialize() {
-  switch (model) {
-    case MODELS[0] /* openai */:
-      history.splice(0);
-      history.push({ role: "system", content: systemMessage }); /* add the system message */
-      break;
-    case MODELS[1] /* anthropic */:
-      history.splice(0);
-      break;
-    default:
-      process.stdout.write(`${chalk.yellow("system:")} model error`);
-      process.exit(1);
-  }
-}
 
 /********/
 /* chat */
