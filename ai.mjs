@@ -27,6 +27,7 @@ Usage:
   .system           log the current system message
   .temperature      log the current temperature
   .model            log the current model
+  .out              copy latest response to clipboard
   .new              clear history
   .explain <topic>  explain a topic in detail
   .howto <task>     describe how to do a task step-by-step
