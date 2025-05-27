@@ -56,8 +56,6 @@ rl.on("line", async (line) => {
   switch (line.trim()) {
     case ".exit":
     case ".quit":
-      /* exit prompt */
-      process.stdout.write(`${chalk.yellow("system:")} prompt finished\n`);
       rl.close();
     case ".help":
       /* show help */
