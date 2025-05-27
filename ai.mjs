@@ -2,6 +2,8 @@
 import { Anthropic } from "@anthropic-ai/sdk";
 import { OpenAI } from "openai";
 import readline from "node:readline"; /* interactive prompt */
+import os from "node:os"; /* detect platform */
+import { spawnSync } from "node:child_process"; /* copy to clipboard */
 import { Option, program } from "commander"; /* CLI framework */
 import chalk from "chalk"; /* terminal colors */
 
@@ -92,6 +94,23 @@ rl.on("line", async (line) => {
       /* log current model */
       process.stdout.write(`${chalk.yellow("system:")} current ${JSON.stringify(model)}\n`);
       process.stdout.write(`${chalk.yellow("system:")} available ${JSON.stringify(MODELS)}\n`);
+      break;
+    case ".out":
+      /* output latest response to clipboard */
+      const latestResponse = history[history.length - 1].content;
+      switch (os.platform()) {
+        case "darwin" /* macOS */:
+          spawnSync("pbcopy", { input: latestResponse });
+          break;
+        case "linux" /* Linux */:
+          spawnSync("xclip", ["-selection", "clipboard"], { input: latestResponse });
+          break;
+        case "win32" /* Windows */:
+          spawnSync("clip", { input: latestResponse });
+          break;
+        default:
+          process.stdout.write(`${chalk.yellow("system:")} unsupported platform\n`);
+      }
       break;
     case ".new":
       /* clear history */
