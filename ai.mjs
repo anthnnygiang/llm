@@ -29,6 +29,7 @@ Usage:
   .model            log the current model
   .out              copy latest response to clipboard
   .new              clear history
+  """               start multiline input (end with """)
   .explain <topic>  explain a topic in detail
   .howto <task>     describe how to do a task step-by-step
   .help             show this help message
@@ -155,7 +156,7 @@ rl.on("line", async (line) => {
       break;
     default:
       console.log(`default: ${line}`);
-      /* use any prompt templates if specified */
+      /* use any prompt templates if specified (works with multiline) */
       const explainRgx = /^\.explain\s+(.+)/s; /* starts with .explain */
       const howToRgx = /^\.howto\s+(.+)/s; /* starts with .howto */
       switch (true) {
