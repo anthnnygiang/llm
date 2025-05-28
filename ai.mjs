@@ -80,17 +80,17 @@ const rl = readline.createInterface({
 rl.prompt();
 rl.on("line", async (line) => {
   if (line.trim() === '"""') {
-    if (!multiline) {
+    // flip multiline state
+    multiline = !multiline;
+    if (multiline) {
       /* start multiline input */
-      multiline = true;
       multilineBuffer = ""; /* reset multiline buffer */
       rl.setPrompt(`${chalk.cyan("... ")}`);
       rl.prompt();
       return;
     } else {
       /* end multiline input */
-      multiline = false;
-      line = multilineBuffer;
+      line = multilineBuffer; /* use accumulated multiline input */
       rl.setPrompt(`${chalk.cyan("me: ")}`);
     }
   }
@@ -154,9 +154,10 @@ rl.on("line", async (line) => {
       process.stdout.write(`${chalk.yellow("system:")} cleared history\n`);
       break;
     default:
+      console.log(`default: ${line}`);
       /* use any prompt templates if specified */
-      const explainRgx = /^\.explain\s+(.+)$/; /* starts with .explain */
-      const howToRgx = /^\.howto\s+(.+)$/; /* starts with .howto */
+      const explainRgx = /^\.explain\s+(.+)/s; /* starts with .explain */
+      const howToRgx = /^\.howto\s+(.+)/s; /* starts with .howto */
       switch (true) {
         case explainRgx.test(line):
           /* explain a topic */
