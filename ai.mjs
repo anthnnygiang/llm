@@ -44,6 +44,8 @@ const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
 const history = [];
 let minHistory = -1; /* history must be longer than minHistory to copy to clipboard */
+let multiline = false; /* multiline input flag */
+let multilineBuffer = ""; /* buffer for multiline input */
 initialize();
 
 /**********************/
@@ -77,6 +79,28 @@ const rl = readline.createInterface({
 
 rl.prompt();
 rl.on("line", async (line) => {
+  if (line.trim() === '"""') {
+    if (!multiline) {
+      /* start multiline input */
+      multiline = true;
+      multilineBuffer = ""; /* reset multiline buffer */
+      rl.setPrompt(`${chalk.cyan("... ")}`);
+      rl.prompt();
+      return;
+    } else {
+      /* end multiline input */
+      multiline = false;
+      line = multilineBuffer;
+      rl.setPrompt(`${chalk.cyan("me: ")}`);
+    }
+  }
+  if (multiline) {
+    /* accumulate multiline input */
+    multilineBuffer += line + "\n";
+    rl.prompt();
+    return;
+  }
+
   switch (line.trim()) {
     case ".exit":
     case ".quit":
