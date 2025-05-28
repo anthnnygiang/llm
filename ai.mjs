@@ -24,15 +24,16 @@ program.addHelpText(
 Usage:
   For multiline input, use """ (triple quote) to signal the start and end.
   $ ai
-  .exit/quit        quit the prompt gracefully
-  .system           log the current system message
-  .temperature      log the current temperature
-  .model            log the current model
-  .out              copy latest response to clipboard
-  .new              clear history
-  .explain <topic>  explain a topic in detail
-  .howto <task>     describe how to do a task step-by-step
-  .help             show this help message
+  .exit/quit         quit the prompt gracefully
+  .system            log the current system message
+  .temperature       log the current temperature
+  .model             log the current model
+  .out               copy latest response to clipboard
+  .new               clear history
+  .explain <topic>   explain a topic in detail
+  .summarise <text>  summarise a text
+  .howto <task>      describe how to do a task step-by-step
+  .help              show this help message
   `,
 );
 program.showHelpAfterError();
@@ -157,12 +158,17 @@ rl.on("line", async (line) => {
     default:
       /* use any prompt templates if specified (works with multiline) */
       const explainRgx = /^\.explain\s+(.+)/s; /* starts with .explain */
+      const summariseRgx = /^\.summarise\s+(.+)/s; /* starts with .summarise */
       const howToRgx = /^\.howto\s+(.+)/s; /* starts with .howto */
       switch (true) {
         case explainRgx.test(line):
           /* explain a topic */
           const explainMatch = line.match(explainRgx);
           line = `Explain "${explainMatch[1]}" in detail. Provide an in-depth overview including: key concepts, historical context, relevant examples, and lastly further reading topics.`;
+          break;
+        case summariseRgx.test(line):
+          const summariseMatch = line.match(summariseRgx);
+          line = `Read the following text and produce a short summary. Focus on the main ideas, arguments, and conclusions. Text: "${summariseMatch[1]}".`;
           break;
         case howToRgx.test(line):
           /* how to do task */
