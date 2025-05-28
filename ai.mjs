@@ -22,6 +22,7 @@ program.addHelpText(
   "after",
   `
 Usage:
+  For multiline input, use """ (triple quote) to signal the start and end.
   $ ai
   .exit/quit        quit the prompt gracefully
   .system           log the current system message
@@ -29,7 +30,6 @@ Usage:
   .model            log the current model
   .out              copy latest response to clipboard
   .new              clear history
-  """               start multiline input (end with """)
   .explain <topic>  explain a topic in detail
   .howto <task>     describe how to do a task step-by-step
   .help             show this help message
