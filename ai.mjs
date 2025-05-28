@@ -155,7 +155,6 @@ rl.on("line", async (line) => {
       process.stdout.write(`${chalk.yellow("system:")} cleared history\n`);
       break;
     default:
-      console.log(`default: ${line}`);
       /* use any prompt templates if specified (works with multiline) */
       const explainRgx = /^\.explain\s+(.+)/s; /* starts with .explain */
       const howToRgx = /^\.howto\s+(.+)/s; /* starts with .howto */
