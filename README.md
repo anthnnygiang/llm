@@ -1,5 +1,5 @@
 # AI-CLI
-Simple LLM CLI.\
+Simple CLI.\
 1 file. 250 lines.
 
 ![example](example.gif)
