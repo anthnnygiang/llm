@@ -16,23 +16,20 @@ const MODELS = ["o4-mini", "claude-3-7-sonnet-latest"]; /* optimal model from ea
 
 program
   .option("-t, --temperature <temperature>", "response creativity, between [0,2]", parseFloat, 1)
-  .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant. Answer succinctly.")
+  .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant. Answer concisely.")
   .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
 program.addHelpText(
   "after",
   `
-Usage:
-  For multiline input, use """ (triple quote) to signal the start and end.
-  $ ai
+Prompt:
+  For multiline input, use ††† (triple dagger) to signal the start and end. (Mac: ⌥T)
+
   .exit/quit         quit the prompt gracefully
   .system            log the current system message
   .temperature       log the current temperature
   .model             log the current model
   .out               copy latest response to clipboard
   .new               clear history
-  .explain <topic>   explain a topic in detail
-  .summarise <text>  summarise a text
-  .howto <task>      describe how to do a task step-by-step
   .help              show this help message
   `,
 );
@@ -81,7 +78,7 @@ const rl = readline.createInterface({
 
 rl.prompt();
 rl.on("line", async (line) => {
-  if (line.trim() === '"""') {
+  if (line.trim() === "†††") {
     // flip multiline state
     multiline = !multiline;
     if (multiline) {
@@ -156,28 +153,6 @@ rl.on("line", async (line) => {
       process.stdout.write(`${chalk.yellow("system:")} cleared history\n`);
       break;
     default:
-      /* use any prompt templates if specified (works with multiline) */
-      const explainRgx = /^\.explain\s+(.+)/s; /* starts with .explain */
-      const summariseRgx = /^\.summarise\s+(.+)/s; /* starts with .summarise */
-      const howToRgx = /^\.howto\s+(.+)/s; /* starts with .howto */
-      switch (true) {
-        case explainRgx.test(line):
-          /* explain a topic */
-          const explainMatch = line.match(explainRgx);
-          line = `Explain "${explainMatch[1]}" in detail. Provide an in-depth overview including: key concepts, historical context, relevant examples, and lastly further reading topics.`;
-          break;
-        case summariseRgx.test(line):
-          const summariseMatch = line.match(summariseRgx);
-          line = `Read the following text and produce a short summary. Focus on the main ideas, arguments, and conclusions. Text: "${summariseMatch[1]}".`;
-          break;
-        case howToRgx.test(line):
-          /* how to do task */
-          const howToMatch = line.match(howToRgx);
-          line = `How to "${howToMatch[1]}"? Provide a step-by-step guide with detailed instructions. Note any prerequisites and common pitfalls.`;
-          break;
-      }
-
-      /* chat */
       history.push({ role: "user", content: line.trim() });
       const result = await chat();
       history.push(result);
