@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "vitest run"
+  },
   "bin": {
     "ai": "./ai.mjs"
   },
@@ -17,6 +19,7 @@
     "openai": "^5.0.1"
   },
   "devDependencies": {
-    "prettier": "^3.2.4"
+    "prettier": "^3.2.4",
+    "vitest": "^3.2.4"
   }
 }

@@ -7,17 +7,33 @@ import { spawnSync } from "node:child_process"; /* copy to clipboard */
 import { Option, program } from "commander"; /* CLI framework */
 import chalk from "chalk"; /* terminal colors */
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_CLI;
-const OPENAI_API_KEY = process.env.OPENAI_CLI;
-const MODELS = ["o4-mini", "claude-3-7-sonnet-latest"]; /* optimal model from each provider */
+export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_CLI;
+export const OPENAI_API_KEY = process.env.OPENAI_CLI;
+export const MODELS = [
+  "o4-mini",
+  "claude-3-7-sonnet-latest",
+]; /* optimal model from each provider */
 
 /***************/
 /* cli options */
 
 program
-  .option("-t, --temperature <temperature>", "response creativity, between [0,2]", parseFloat, 1)
-  .option("-s, --system-message <message>", "modify ai behaviour", "You are a helpful assistant. Answer concisely.")
-  .addOption(new Option("-m, --model <model>", "model version").choices(MODELS).default(MODELS[0]));
+  .option(
+    "-t, --temperature <temperature>",
+    "response creativity, between [0,2]",
+    parseFloat,
+    1,
+  )
+  .option(
+    "-s, --system-message <message>",
+    "modify ai behaviour",
+    "You are a helpful assistant. Answer concisely.",
+  )
+  .addOption(
+    new Option("-m, --model <model>", "model version")
+      .choices(MODELS)
+      .default(MODELS[0]),
+  );
 program.addHelpText(
   "after",
   `
@@ -42,7 +58,8 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
 const history = [];
-let minHistory = -1; /* history must be longer than minHistory to copy to clipboard */
+let minHistory =
+  -1; /* history must be longer than minHistory to copy to clipboard */
 let multiline = false; /* multiline input flag */
 let multilineBuffer = ""; /* buffer for multiline input */
 initialize();
@@ -54,7 +71,10 @@ function initialize() {
   switch (model) {
     case MODELS[0] /* openai */:
       history.splice(0);
-      history.push({ role: "system", content: systemMessage }); /* add the system message */
+      history.push({
+        role: "system",
+        content: systemMessage,
+      }); /* add the system message */
       minHistory = 1; /* openai requires at least 1 message in history */
       break;
     case MODELS[1] /* anthropic */:
@@ -122,13 +142,19 @@ rl.on("line", async (line) => {
       break;
     case ".model":
       /* log current model */
-      process.stdout.write(`${chalk.yellow("system:")} current ${JSON.stringify(model)}\n`);
-      process.stdout.write(`${chalk.yellow("system:")} available ${JSON.stringify(MODELS)}\n`);
+      process.stdout.write(
+        `${chalk.yellow("system:")} current ${JSON.stringify(model)}\n`,
+      );
+      process.stdout.write(
+        `${chalk.yellow("system:")} available ${JSON.stringify(MODELS)}\n`,
+      );
       break;
     case ".out":
       /* output latest response to clipboard */
       if (history.length <= minHistory) {
-        process.stdout.write(`${chalk.yellow("system:")} could not copy to clipboard \n`);
+        process.stdout.write(
+          `${chalk.yellow("system:")} could not copy to clipboard \n`,
+        );
         break;
       }
       const latestResponse = history[history.length - 1].content;
@@ -137,13 +163,17 @@ rl.on("line", async (line) => {
           spawnSync("pbcopy", { input: latestResponse });
           break;
         case "linux" /* Linux */:
-          spawnSync("xclip", ["-selection", "clipboard"], { input: latestResponse });
+          spawnSync("xclip", ["-selection", "clipboard"], {
+            input: latestResponse,
+          });
           break;
         case "win32" /* Windows */:
           spawnSync("clip", { input: latestResponse });
           break;
         default:
-          process.stdout.write(`${chalk.yellow("system:")} unsupported platform\n`);
+          process.stdout.write(
+            `${chalk.yellow("system:")} unsupported platform\n`,
+          );
       }
       process.stdout.write(`${chalk.yellow("system:")} copied to clipboard\n`);
       break;
@@ -184,16 +214,22 @@ async function chat() {
 /**********************/
 /* openai api request */
 
-async function OpenAIChat() {
-  const completion = await openai.chat.completions.create({
-    model: model,
+export async function OpenAIChat(
+  client = openai,
+  _model = model,
+  _messages = history,
+  _temperature = temperature,
+) {
+  const completion = await client.chat.completions.create({
+    model: _model,
     stream: true,
-    messages: history,
-    temperature: temperature,
+    messages: _messages,
+    temperature: _temperature,
   });
   let fullContent = "";
   for await (const chunk of completion) {
-    const completionDelta = chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
+    const completionDelta =
+      chunk.choices[0].delta.content ?? "\n"; /* there is only 1 choice */
     process.stdout.write(`${completionDelta}`);
     fullContent += completionDelta;
   }
@@ -206,13 +242,19 @@ async function OpenAIChat() {
 /*************************/
 /* anthropic api request */
 
-async function AnthropicChat() {
-  const message = anthropic.messages.stream({
-    model: model,
-    temperature: temperature,
+export async function AnthropicChat(
+  client = anthropic,
+  _model = model,
+  _temperature = temperature,
+  _system = systemMessage,
+  _messages = history,
+) {
+  const message = client.messages.stream({
+    model: _model,
+    temperature: _temperature,
     max_tokens: 1024,
-    system: systemMessage,
-    messages: history,
+    system: _system,
+    messages: _messages,
   });
   let fullMessage = "";
   for await (const chunk of message) {
