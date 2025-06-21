@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-
-// test PR CI.
 import { Anthropic } from "@anthropic-ai/sdk";
 import { OpenAI } from "openai";
 import readline from "node:readline"; /* interactive prompt */
