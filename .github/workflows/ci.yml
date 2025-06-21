@@ -6,10 +6,14 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      OPENAI_CLI: ${{ secrets.OPENAI_CLI }}
+      ANTHROPIC_CLI: ${{ secrets.ANTHROPIC_CLI }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -23,4 +27,4 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm test
+        run: npm run test
