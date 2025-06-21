@@ -9,8 +9,8 @@ import { spawnSync } from "node:child_process"; /* copy to clipboard */
 import { Option, program } from "commander"; /* CLI framework */
 import chalk from "chalk"; /* terminal colors */
 
-export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_CLI;
 export const OPENAI_API_KEY = process.env.OPENAI_CLI;
+export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_CLI;
 export const MODELS = [
   "o4-mini",
   "claude-3-7-sonnet-latest",
