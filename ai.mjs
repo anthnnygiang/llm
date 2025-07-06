@@ -38,7 +38,7 @@ program.addHelpText(
   "after",
   `
 Prompt:
-  For multiline input, use ††† (triple dagger) to signal the start and end. (Mac: ⌥T)
+  For multiline input, use ^^^ (triple carat) to signal the start and end.
 
   .exit/quit         quit the prompt gracefully
   .system            log the current system message
@@ -98,7 +98,7 @@ const rl = readline.createInterface({
 
 rl.prompt();
 rl.on("line", async (line) => {
-  if (line.trim() === "†††") {
+  if (line.trim() === "^^^") {
     // flip multiline state
     multiline = !multiline;
     if (multiline) {
