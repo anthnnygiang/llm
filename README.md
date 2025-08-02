@@ -1,4 +1,4 @@
-# AI-CLI
+# LLM
 Simple CLI.\
 1 file. 250 lines.
 
@@ -8,7 +8,6 @@ Simple CLI.\
 - Interactive chat (OpenAI, Anthropic)
 - Output to clipboard
 - Multi-line input
-- Prompt templates
 
 ## Requirements:
 - Node version >= `20`

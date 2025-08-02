@@ -94,7 +94,7 @@ function initialize() {
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: `${chalk.cyan("me: ")}`,
+  prompt: `${chalk.cyan("-->: ")}`,
 });
 
 rl.prompt();
@@ -111,7 +111,7 @@ rl.on("line", async (line) => {
     } else {
       /* end multiline input */
       line = multilineBuffer; /* use accumulated multiline input */
-      rl.setPrompt(`${chalk.cyan("me: ")}`);
+      rl.setPrompt(`${chalk.cyan("-->: ")}`);
     }
   }
   if (multiline) {
@@ -199,7 +199,7 @@ rl.on("line", async (line) => {
 /* chat */
 
 async function chat() {
-  process.stdout.write(`${chalk.green(`ai: `)}`);
+  process.stdout.write(`${chalk.green(`llm: `)}`);
   switch (model) {
     case MODELS[0] /* openai */:
       return await OpenAIChat();
