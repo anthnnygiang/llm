@@ -45,6 +45,7 @@ Prompt:
   .temperature       log the current temperature
   .model             log the current model
   .out               copy latest response to clipboard
+  .prompts           copy all user prompts to clipboard
   .new               clear history
   .help              show this help message
   `,
@@ -158,23 +159,7 @@ rl.on("line", async (line) => {
         break;
       }
       const latestResponse = history[history.length - 1].content;
-      switch (os.platform()) {
-        case "darwin" /* macOS */:
-          spawnSync("pbcopy", { input: latestResponse });
-          break;
-        case "linux" /* Linux */:
-          spawnSync("xclip", ["-selection", "clipboard"], {
-            input: latestResponse,
-          });
-          break;
-        case "win32" /* Windows */:
-          spawnSync("clip", { input: latestResponse });
-          break;
-        default:
-          process.stdout.write(
-            `${chalk.yellow("system:")} unsupported platform\n`,
-          );
-      }
+      copyToClipboard(latestResponse);
       process.stdout.write(`${chalk.yellow("system:")} copied to clipboard\n`);
       break;
     case ".prompts":
@@ -189,23 +174,7 @@ rl.on("line", async (line) => {
         .filter((msg) => msg.role === "user")
         .map((msg) => msg.content)
         .join("\n");
-      switch (os.platform()) {
-        case "darwin" /* macOS */:
-          spawnSync("pbcopy", { input: allPrompts });
-          break;
-        case "linux" /* Linux */:
-          spawnSync("xclip", ["-selection", "clipboard"], {
-            input: allPrompts,
-          });
-          break;
-        case "win32" /* Windows */:
-          spawnSync("clip", { input: allPrompts });
-          break;
-        default:
-          process.stdout.write(
-            `${chalk.yellow("system:")} unsupported platform\n`,
-          );
-      }
+      copyToClipboard(allPrompts);
       process.stdout.write(`${chalk.yellow("system:")} copied to clipboard\n`);
       break;
     case ".new":
@@ -298,4 +267,23 @@ export async function AnthropicChat(
     role: "assistant",
     content: fullMessage,
   };
+}
+
+/*********************/
+/* copy to clipboard */
+
+function copyToClipboard(text) {
+  switch (os.platform()) {
+    case "darwin" /* macOS */:
+      spawnSync("pbcopy", { input: text });
+      break;
+    case "linux" /* Linux */:
+      spawnSync("xclip", ["-selection", "clipboard"], { input: text });
+      break;
+    case "win32" /* Windows */:
+      spawnSync("clip", { input: text });
+      break;
+    default:
+      process.stdout.write(`${chalk.yellow("system:")} unsupported platform\n`);
+  }
 }
