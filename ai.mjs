@@ -177,6 +177,37 @@ rl.on("line", async (line) => {
       }
       process.stdout.write(`${chalk.yellow("system:")} copied to clipboard\n`);
       break;
+    case ".prompts":
+      /* output all prompts to clipboard */
+      if (history.length <= minHistory) {
+        process.stdout.write(
+          `${chalk.yellow("system:")} could not copy to clipboard \n`,
+        );
+        break;
+      }
+      const allPrompts = history
+        .filter((msg) => msg.role === "user")
+        .map((msg) => msg.content)
+        .join("\n");
+      switch (os.platform()) {
+        case "darwin" /* macOS */:
+          spawnSync("pbcopy", { input: allPrompts });
+          break;
+        case "linux" /* Linux */:
+          spawnSync("xclip", ["-selection", "clipboard"], {
+            input: allPrompts,
+          });
+          break;
+        case "win32" /* Windows */:
+          spawnSync("clip", { input: allPrompts });
+          break;
+        default:
+          process.stdout.write(
+            `${chalk.yellow("system:")} unsupported platform\n`,
+          );
+      }
+      process.stdout.write(`${chalk.yellow("system:")} copied to clipboard\n`);
+      break;
     case ".new":
       /* clear history */
       initialize();
