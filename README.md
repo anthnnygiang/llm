@@ -3,6 +3,7 @@ Simple CLI.\
 1 file. 250 lines.
 
 ![example](example.gif)
+Note: renamed command to `llm`.
 
 ## Features:
 - Interactive chat (OpenAI, Anthropic)
@@ -18,7 +19,7 @@ Simple CLI.\
 1. Clone repo.
 2. `$ npm link`.
 3. Add `export OPENAI_CLI="12345"` and `export ANTHROPIC_CLI="12345"` to `.zshrc`.
-5. `$ ai` from anywhere.
+5. `$ llm` from anywhere.
 
 ## Why?
 - Extreme simplicity. Intentionally minimal.\

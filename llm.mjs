@@ -94,7 +94,7 @@ function initialize() {
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: `${chalk.cyan("-->: ")}`,
+  prompt: `${chalk.cyan("-> ")}`,
 });
 
 rl.prompt();
@@ -105,13 +105,13 @@ rl.on("line", async (line) => {
     if (multiline) {
       /* start multiline input */
       multilineBuffer = ""; /* reset multiline buffer */
-      rl.setPrompt(`${chalk.cyan("... ")}`);
+      rl.setPrompt(`${chalk.cyan(".. ")}`);
       rl.prompt();
       return;
     } else {
       /* end multiline input */
       line = multilineBuffer; /* use accumulated multiline input */
-      rl.setPrompt(`${chalk.cyan("-->: ")}`);
+      rl.setPrompt(`${chalk.cyan("-> ")}`);
     }
   }
   if (multiline) {
