@@ -1,5 +1,5 @@
 # LLM
-Simple CLI.\
+Simple LLM CLI.\
 1 file. 250 lines.
 
 ![example](example.gif)
