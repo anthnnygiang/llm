@@ -18,7 +18,10 @@ Note: renamed command to `llm`.
 ## Usage:
 1. Clone repo.
 2. `$ npm link`.
-3. Add `export OPENAI_CLI="12345"` and `export ANTHROPIC_CLI="12345"` to `.zshrc`.
+3. Add
+   * `export OPENAI_CLI="12345"`,
+   * `export ANTHROPIC_CLI="12345"`,
+   * and  `export GOOGLE_CLI="12345"` to `.zshrc` or `.zlogin`.
 5. `$ llm` from anywhere.
 
 ## Why?
