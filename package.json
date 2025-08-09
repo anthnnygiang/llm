@@ -5,17 +5,19 @@
   "main": "index.js",
   "bin": {
     "llm": "./llm.mjs",
-    "llm2": "./dist/main.js"
+    "llm2": "./dist/main.mjs"
   },
   "scripts": {
-    "format": "prettier --write .",
-    "build": "tsc"
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.57.0",
+    "@google/genai": "^1.13.0",
     "chalk": "^5.3.0",
     "commander": "^14.0.0",
     "openai": "^5.0.1",
