@@ -19,7 +19,7 @@ export const ANTHROPIC_API_KEY = getEnv("ANTHROPIC_CLI");
 export const GOOGLE_API_KEY = getEnv("GOOGLE_CLI");
 
 const PROVIDER_MODELS = {
-  openai: "o4-mini",
+  openai: "gpt-5-mini",
   anthropic: "claude-3-7-sonnet-latest",
   google: "gemini-2.5-flash",
 } as const;
@@ -54,7 +54,7 @@ program.parse(process.argv);
 
 let { provider } = program.opts<{ provider: Provider }>();
 const model = PROVIDER_MODELS[provider];
-const system = "Answer concisely. No markdown formatting.";
+const system = "Answer.";
 
 /* model providers */
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
