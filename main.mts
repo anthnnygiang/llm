@@ -3,10 +3,10 @@ import { Anthropic } from "@anthropic-ai/sdk";
 import { OpenAI } from "openai";
 import { GoogleGenAI } from "@google/genai";
 import readline from "node:readline"; /* interactive prompt */
-import { styleText } from "node:util";
 import os from "node:os"; /* detect platform */
 import { spawnSync } from "node:child_process"; /* copy to clipboard */
 import { Option, program } from "commander"; /* CLI framework */
+import chalk from "chalk"; /* terminal colors */
 
 import type {
   OpenAIChatMessage,
@@ -80,10 +80,12 @@ function initialize() {
 /**********************/
 /* interactive prompt */
 
+const userPrompt = chalk.cyan("? ");
+const llmPrompt = chalk.green("> ");
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: `-> `,
+  prompt: userPrompt,
 });
 
 let message: string; /* current line input */
@@ -97,12 +99,13 @@ rl.on("line", async (line) => {
       /* start multiline input */
       multilineBuffer = ""; /* reset multiline buffer */
       rl.setPrompt(`".. "`);
+      rl.setPrompt(`${chalk.cyan("..")}`);
       rl.prompt();
       return;
     } else {
       /* end multiline input */
       line = multilineBuffer; /* use accumulated multiline input */
-      rl.setPrompt(`"-> "`);
+      rl.setPrompt(userPrompt);
     }
   }
   if (multiline) {
@@ -122,15 +125,15 @@ rl.on("line", async (line) => {
       break;
     case ".provider":
       /* log current provider */
-      process.stdout.write(`system: ${JSON.stringify(provider)}\n`);
+      process.stdout.write(`${chalk.yellow("system:")} ${provider}\n`);
       break;
     case ".model":
       /* log current model */
-      process.stdout.write(`system: ${JSON.stringify(model)}\n`);
+      process.stdout.write(`${chalk.yellow("system:")} ${model}\n`);
       break;
     case ".system":
       /* log current system prompt */
-      process.stdout.write(`system: ${JSON.stringify(system)}\n`);
+      process.stdout.write(`${chalk.yellow("system:")} ${system}\n`);
       break;
     case ".out":
       copyToClipboard({ todo: "todo" });
@@ -138,7 +141,7 @@ rl.on("line", async (line) => {
     case ".new":
       /* clear history */
       initialize();
-      process.stdout.write(`system: cleared history\n`);
+      process.stdout.write(`${chalk.yellow("system:")} cleared history\n`);
       break;
     default:
       message = line;
@@ -149,7 +152,7 @@ rl.on("line", async (line) => {
   rl.prompt();
 }).on("close", () => {
   /* ctrl-c/d */
-  process.stdout.write(`system: prompt finished\n`);
+  process.stdout.write(`\n${chalk.yellow("system:")} prompt finished\n`);
   process.exit(0);
 });
 
@@ -157,7 +160,7 @@ rl.on("line", async (line) => {
 /* chat */
 
 async function chat() {
-  process.stdout.write(`llm: `);
+  process.stdout.write(llmPrompt);
   switch (provider) {
     case "openai":
       openAIHistory.push({
@@ -184,7 +187,7 @@ async function chat() {
       googleHistory.push(googleResponse);
       break;
     default:
-      process.stdout.write(`system: model error`);
+      process.stdout.write(`${chalk.yellow("system:")} model error`);
       process.exit(1);
   }
 }
@@ -276,14 +279,16 @@ function copyToClipboard(history: object) {
       spawnSync("clip", { input: text });
       break;
     default:
-      process.stdout.write(`system: unsupported platform\n`);
+      process.stdout.write(`${chalk.yellow("system:")} unsupported platform\n`);
   }
 }
 
 function getEnv(key: string): string {
   const val = process.env[key];
   if (!val) {
-    process.stderr.write(`error: Environment variable ${key} is required.\n`);
+    process.stderr.write(
+      `${chalk.red("error:")} environment variable ${key} is required\n`,
+    );
     process.exit(1);
   }
   return val;

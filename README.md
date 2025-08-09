@@ -6,7 +6,7 @@ Simple LLM CLI.\
 Note: renamed command to `llm`.
 
 ## Features:
-- Interactive chat (OpenAI, Anthropic)
+- Interactive chat (OpenAI, Anthropic, Google)
 - Output to clipboard
 - Multi-line input
 
@@ -17,15 +17,16 @@ Note: renamed command to `llm`.
 
 ## Usage:
 1. Clone repo.
-2. `$ npm link`.
-3. Add
+2. Add
    * `export OPENAI_CLI="12345"`,
    * `export ANTHROPIC_CLI="12345"`,
    * and  `export GOOGLE_CLI="12345"` to `.zshrc` or `.zlogin`.
+3. `$ npm run build` to build the JS file
+4. `$ npm link`
 5. `$ llm` from anywhere.
 
 ## Why?
-- Extreme simplicity. Intentionally minimal.\
+- Intentionally minimal.\
   Fully featured alternatives:
   - [simonw/llm](https://github.com/simonw/llm)
   - [sigoden/aichat](https://github.com/sigoden/aichat)

@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "llm": "./llm.mjs",
-    "llm2": "./dist/main.mjs"
+    "llm": "./dist/main.mjs"
   },
   "scripts": {
     "dev": "tsc --watch",
