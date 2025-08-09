@@ -1,5 +1,5 @@
 export type OpenAIChatMessage = {
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant";
   content: string;
 };
 
@@ -9,6 +9,6 @@ export type AnthropicChatMessage = {
 };
 
 export type GoogleChatMessage = {
-  role: "user" | "assistant";
-  parts: string;
+  role: "user" | "model";
+  parts: { text: string }[];
 };

@@ -43,6 +43,7 @@ Prompt:
   For multiline input, use ^^^ (triple carat) to signal the start and end.
 
   .provider          log the current provider
+  .system            log the current system prompt
   .out               copy history to clipboard
   .new               clear history
   .help              show this help message
@@ -53,7 +54,7 @@ program.parse(process.argv);
 
 let { provider } = program.opts<{ provider: Provider }>();
 const model = PROVIDER_MODELS[provider];
-const system = "Answer concisely";
+const system = "Answer concisely. No markdown formatting.";
 
 /* model providers */
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
@@ -75,8 +76,6 @@ function initialize() {
   anthropicHistory = [];
   googleHistory = [];
 }
-const successMessage = styleText("green", "test styleText");
-console.log(successMessage);
 
 /**********************/
 /* interactive prompt */
@@ -123,7 +122,15 @@ rl.on("line", async (line) => {
       break;
     case ".provider":
       /* log current provider */
-      process.stdout.write(`system: current ${JSON.stringify(provider)}\n`);
+      process.stdout.write(`system: ${JSON.stringify(provider)}\n`);
+      break;
+    case ".model":
+      /* log current model */
+      process.stdout.write(`system: ${JSON.stringify(model)}\n`);
+      break;
+    case ".system":
+      /* log current system prompt */
+      process.stdout.write(`system: ${JSON.stringify(system)}\n`);
       break;
     case ".out":
       copyToClipboard({ todo: "todo" });
@@ -169,7 +176,13 @@ async function chat() {
       anthropicHistory.push(anthropicResponse);
       break;
     case "google":
-      return await GoogleChat();
+      googleHistory.push({
+        role: "user",
+        parts: [{ text: message }],
+      });
+      const googleResponse = await GoogleChat();
+      googleHistory.push(googleResponse);
+      break;
     default:
       process.stdout.write(`system: model error`);
       process.exit(1);
@@ -227,7 +240,25 @@ export async function AnthropicChat(): Promise<AnthropicChatMessage> {
 /**********************/
 /* google api request */
 
-export async function GoogleChat() {}
+export async function GoogleChat(): Promise<GoogleChatMessage> {
+  const response = await google.models.generateContentStream({
+    model: model,
+    config: {
+      systemInstruction: system,
+    },
+    contents: googleHistory,
+  });
+  let fullContent = "";
+  for await (const chunk of response) {
+    console.log(chunk.text);
+    fullContent += chunk.text;
+  }
+  // process.stdout.write(`\n`);
+  return {
+    role: "model",
+    parts: [{ text: fullContent }],
+  };
+}
 
 /*********************/
 /* copy to clipboard */
