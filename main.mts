@@ -60,9 +60,9 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 const google = new GoogleGenAI({ apiKey: GOOGLE_API_KEY });
 
-const openAIHistory: OpenAIChatMessage[] = [];
-const anthropicHistory: AnthropicChatMessage[] = [];
-const googleHistory: GoogleChatMessage[] = [];
+let openAIHistory: OpenAIChatMessage[];
+let anthropicHistory: AnthropicChatMessage[];
+let googleHistory: GoogleChatMessage[];
 
 let multiline = false; /* multiline input flag */
 let multilineBuffer = ""; /* buffer for multiline input */
@@ -71,10 +71,9 @@ let multilineBuffer = ""; /* buffer for multiline input */
 /* initialize history */
 
 function initialize() {
-  openAIHistory.push({
-    role: "system",
-    content: system,
-  });
+  openAIHistory = [];
+  anthropicHistory = [];
+  googleHistory = [];
 }
 const successMessage = styleText("green", "test styleText");
 console.log(successMessage);
@@ -89,6 +88,7 @@ const rl = readline.createInterface({
 });
 
 let message: string; /* current line input */
+initialize();
 rl.prompt();
 rl.on("line", async (line) => {
   if (line.trim() === "^^^") {
@@ -159,6 +159,7 @@ async function chat() {
       });
       const response = await OpenAIChat();
       openAIHistory.push(response);
+      break;
     case "anthropic":
       anthropicHistory.push({
         role: "user",
@@ -166,6 +167,7 @@ async function chat() {
       });
       const anthropicResponse = await AnthropicChat();
       anthropicHistory.push(anthropicResponse);
+      break;
     case "google":
       return await GoogleChat();
     default:
@@ -178,18 +180,20 @@ async function chat() {
 /* openai api request */
 
 export async function OpenAIChat(): Promise<OpenAIChatMessage> {
-  const completion = await openai.chat.completions.create({
+  const stream = await openai.responses.create({
+    instructions: system,
     model: model,
+    input: openAIHistory,
     stream: true,
-    messages: openAIHistory,
   });
   let fullContent = "";
-  for await (const chunk of completion) {
-    const completionDelta =
-      chunk.choices?.[0]?.delta?.content ?? "\n"; /* there is only 1 choice */
-    process.stdout.write(`${completionDelta}`);
-    fullContent += completionDelta;
+  for await (const event of stream) {
+    if (event.type === "response.output_text.delta") {
+      const chunk = event.delta;
+      process.stdout.write(`${chunk}`);
+    }
   }
+  process.stdout.write(`\n`);
   return {
     role: "assistant",
     content: fullContent,
