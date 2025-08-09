@@ -126,7 +126,7 @@ rl.on("line", async (line) => {
       process.stdout.write(`system: current ${JSON.stringify(provider)}\n`);
       break;
     case ".out":
-      copyToClipboard("TODO");
+      copyToClipboard({ todo: "todo" });
       break;
     case ".new":
       /* clear history */
@@ -159,9 +159,13 @@ async function chat() {
       });
       const response = await OpenAIChat();
       openAIHistory.push(response);
-    // case "anthropic":
-    //   const anthropicResponse = await AnthropicChat();
-    //   anthropicHistory.push(anthropicResponse);
+    case "anthropic":
+      anthropicHistory.push({
+        role: "user",
+        content: message,
+      });
+      const anthropicResponse = await AnthropicChat();
+      anthropicHistory.push(anthropicResponse);
     case "google":
       return await GoogleChat();
     default:
@@ -195,33 +199,37 @@ export async function OpenAIChat(): Promise<OpenAIChatMessage> {
 /*************************/
 /* anthropic api request */
 
-// export async function AnthropicChat(): Promise<AnthropicChatMessage> {
-//   const message = anthropic.messages.stream({
-//     model: model,
-//     max_tokens: 1024,
-//     system: system,
-//     messages: anthropicHistory,
-//     stream: true,
-//   });
-//   let fullMessage = "";
-//   for await (const chunk of message) {
-//     const messageDelta = chunk?.delta?.text ?? "";
-//     process.stdout.write(`${messageDelta}`);
-//     fullMessage += messageDelta;
-//   }
-//   process.stdout.write("\n");
-//   return {
-//     role: "assistant",
-//     content: fullMessage,
-//   };
-// }
+export async function AnthropicChat(): Promise<AnthropicChatMessage> {
+  let fullContent = "";
+  const message = anthropic.messages
+    .stream({
+      model: model,
+      max_tokens: 1024,
+      system: system,
+      messages: anthropicHistory,
+    })
+    .on("text", (text) => {
+      process.stdout.write(`${text}`);
+      fullContent += text;
+    });
+  await message.finalMessage();
+  process.stdout.write(`\n`);
+  return {
+    role: "assistant",
+    content: fullContent,
+  };
+}
+
+/**********************/
+/* google api request */
 
 export async function GoogleChat() {}
 
 /*********************/
 /* copy to clipboard */
 
-function copyToClipboard(text: string) {
+function copyToClipboard(history: object) {
+  const text = JSON.stringify(history, null, 2);
   switch (os.platform()) {
     case "darwin" /* macOS */:
       spawnSync("pbcopy", { input: text });
