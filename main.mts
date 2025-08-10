@@ -19,7 +19,7 @@ export const ANTHROPIC_API_KEY = getEnv("ANTHROPIC_CLI");
 export const GOOGLE_API_KEY = getEnv("GOOGLE_CLI");
 
 const PROVIDER_MODELS = {
-  openai: "gpt-5-mini",
+  openai: "o4-mini",
   anthropic: "claude-3-7-sonnet-latest",
   google: "gemini-2.5-flash",
 } as const;
@@ -266,8 +266,9 @@ export async function GoogleChat(): Promise<GoogleChatMessage> {
 /*********************/
 /* copy to clipboard */
 
-function copyToClipboard(history: object) {
-  const text = JSON.stringify(history, null, 2);
+function copyToClipboard() {
+  const merged = [...openAIHistory, anthropicHistory, googleHistory];
+  const text = JSON.stringify(merged, null, 2);
   switch (os.platform()) {
     case "darwin" /* macOS */:
       spawnSync("pbcopy", { input: text });
