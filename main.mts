@@ -207,6 +207,7 @@ export async function OpenAIChat(): Promise<OpenAIChatMessage> {
     if (event.type === "response.output_text.delta") {
       const chunk = event.delta;
       process.stdout.write(`${chunk}`);
+      fullContent += chunk;
     }
   }
   process.stdout.write(`\n`);
