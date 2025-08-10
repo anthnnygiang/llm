@@ -268,7 +268,7 @@ export async function GoogleChat(): Promise<GoogleChatMessage> {
 /* copy to clipboard */
 
 function copyToClipboard() {
-  const merged = [...openAIHistory, anthropicHistory, googleHistory];
+  const merged = [...openAIHistory, ...anthropicHistory, ...googleHistory];
   const text = JSON.stringify(merged, null, 2);
   switch (os.platform()) {
     case "darwin" /* macOS */:
