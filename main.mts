@@ -253,7 +253,7 @@ export async function GoogleChat(): Promise<GoogleChatMessage> {
   });
   let fullContent = "";
   for await (const chunk of response) {
-    console.log(chunk.text);
+    process.stdout.write(`${chunk.text}`);
     fullContent += chunk.text;
   }
   // process.stdout.write(`\n`);
