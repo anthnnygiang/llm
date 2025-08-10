@@ -136,7 +136,7 @@ rl.on("line", async (line) => {
       process.stdout.write(`${chalk.yellow("system:")} ${system}\n`);
       break;
     case ".out":
-      copyToClipboard({ todo: "todo" });
+      copyToClipboard();
       break;
     case ".new":
       /* clear history */
