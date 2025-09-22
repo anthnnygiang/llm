@@ -30,3 +30,6 @@ Note: renamed command to `llm`.
   Fully featured alternatives:
   - [simonw/llm](https://github.com/simonw/llm)
   - [sigoden/aichat](https://github.com/sigoden/aichat)
+
+## Development:
+- `$ npm run dev` to run in dev mode with `tsc --watch`.

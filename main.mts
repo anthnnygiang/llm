@@ -54,7 +54,7 @@ program.parse(process.argv);
 
 let { provider } = program.opts<{ provider: Provider }>();
 const model = PROVIDER_MODELS[provider];
-const system = "Answer.";
+const system = "Answer concisely.";
 
 /* model providers */
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
