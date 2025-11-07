@@ -20,7 +20,7 @@ export const GOOGLE_API_KEY = getEnv("GOOGLE_CLI");
 
 const PROVIDER_MODELS = {
   openai: "gpt-4.1-mini",
-  anthropic: "claude-3-7-sonnet-latest",
+  anthropic: "claude-haiku-4-5",
   google: "gemini-2.5-flash",
 } as const;
 type Provider = keyof typeof PROVIDER_MODELS;
