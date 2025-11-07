@@ -34,7 +34,7 @@ const MODELS = Object.values(PROVIDER_MODELS) as Model[];
 program.addOption(
   new Option("-p, --provider <provider>", "model version")
     .choices(PROVIDERS)
-    .default(PROVIDERS[0]),
+    .default(PROVIDERS[2]), // default to google
 );
 program.addHelpText(
   "after",
