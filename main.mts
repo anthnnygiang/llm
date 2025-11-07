@@ -19,7 +19,7 @@ export const ANTHROPIC_API_KEY = getEnv("ANTHROPIC_CLI");
 export const GOOGLE_API_KEY = getEnv("GOOGLE_CLI");
 
 const PROVIDER_MODELS = {
-  openai: "o4-mini",
+  openai: "gpt-4.1-mini",
   anthropic: "claude-3-7-sonnet-latest",
   google: "gemini-2.5-flash",
 } as const;
@@ -34,7 +34,7 @@ const MODELS = Object.values(PROVIDER_MODELS) as Model[];
 program.addOption(
   new Option("-p, --provider <provider>", "model version")
     .choices(PROVIDERS)
-    .default(PROVIDERS[2]), // default to google
+    .default(PROVIDERS[0]), // default model
 );
 program.addHelpText(
   "after",
@@ -245,6 +245,7 @@ export async function AnthropicChat(): Promise<AnthropicChatMessage> {
 /* google api request */
 
 export async function GoogleChat(): Promise<GoogleChatMessage> {
+  console.log("1");
   const response = await google.models.generateContentStream({
     model: model,
     config: {
