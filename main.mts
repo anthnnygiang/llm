@@ -72,6 +72,8 @@ function initialize() {
 
 const userPrompt = chalk.cyan("? ");
 const llmPrompt = chalk.green("> ");
+const breakPrompt = chalk.green(">---\n");
+const smoothDelay = 2; /* ms delay for smooth typing effect */
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -142,7 +144,7 @@ rl.on("line", async (line) => {
   rl.prompt();
 }).on("close", () => {
   /* ctrl-c/d */
-  process.stdout.write(`\n${chalk.yellow("system:")} prompt finished\n`);
+  process.stdout.write(`\n${chalk("system:")} prompt finished\n`);
   process.exit(0);
 });
 
@@ -172,6 +174,7 @@ async function chat() {
       process.stdout.write(`${chalk.yellow("system:")} model error`);
       process.exit(1);
   }
+  process.stdout.write(breakPrompt); // spacing
 }
 
 /**********************/
@@ -190,7 +193,7 @@ async function OpenAIChat(): Promise<OpenAIChatMessage> {
       const chunk = event.delta;
       for (const char of chunk) {
         process.stdout.write(`${char}`);
-        await sleep(1); // smooth typing effect
+        await sleep(smoothDelay); // smooth typing effect
       }
       fullContent += chunk;
     }
@@ -220,7 +223,7 @@ async function GoogleChat(): Promise<GoogleChatMessage> {
     }
     for (const char of chunk.text) {
       process.stdout.write(`${char}`);
-      await sleep(1); // smooth typing effect
+      await sleep(smoothDelay); // smooth typing effect
     }
     fullContent += chunk.text;
   }
