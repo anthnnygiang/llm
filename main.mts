@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { Anthropic } from "@anthropic-ai/sdk";
 import { OpenAI } from "openai";
 import { GoogleGenAI } from "@google/genai";
 import readline from "node:readline"; /* interactive prompt */
@@ -8,19 +7,13 @@ import { spawnSync } from "node:child_process"; /* copy to clipboard */
 import { Option, program } from "commander"; /* CLI framework */
 import chalk from "chalk"; /* terminal colors */
 
-import type {
-  OpenAIChatMessage,
-  AnthropicChatMessage,
-  GoogleChatMessage,
-} from "./types";
+import type { OpenAIChatMessage, GoogleChatMessage } from "./types";
 
 export const OPENAI_API_KEY = getEnv("OPENAI_CLI");
-export const ANTHROPIC_API_KEY = getEnv("ANTHROPIC_CLI");
 export const GOOGLE_API_KEY = getEnv("GOOGLE_CLI");
 
 const PROVIDER_MODELS = {
   openai: "gpt-4.1-mini",
-  anthropic: "claude-haiku-4-5",
   google: "gemini-2.5-flash",
 } as const;
 type Provider = keyof typeof PROVIDER_MODELS;
@@ -34,7 +27,7 @@ const MODELS = Object.values(PROVIDER_MODELS) as Model[];
 program.addOption(
   new Option("-p, --provider <provider>", "model version")
     .choices(PROVIDERS)
-    .default(PROVIDERS[0]), // default model
+    .default(PROVIDERS[1]), // default model
 );
 program.addHelpText(
   "after",
@@ -58,11 +51,9 @@ const system = "Answer concisely.";
 
 /* model providers */
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 const google = new GoogleGenAI({ apiKey: GOOGLE_API_KEY });
 
 let openAIHistory: OpenAIChatMessage[];
-let anthropicHistory: AnthropicChatMessage[];
 let googleHistory: GoogleChatMessage[];
 
 let multiline = false; /* multiline input flag */
@@ -73,7 +64,6 @@ let multilineBuffer = ""; /* buffer for multiline input */
 
 function initialize() {
   openAIHistory = [];
-  anthropicHistory = [];
   googleHistory = [];
 }
 
@@ -170,14 +160,6 @@ async function chat() {
       const response = await OpenAIChat();
       openAIHistory.push(response);
       break;
-    case "anthropic":
-      anthropicHistory.push({
-        role: "user",
-        content: message,
-      });
-      const anthropicResponse = await AnthropicChat();
-      anthropicHistory.push(anthropicResponse);
-      break;
     case "google":
       googleHistory.push({
         role: "user",
@@ -217,35 +199,10 @@ export async function OpenAIChat(): Promise<OpenAIChatMessage> {
   };
 }
 
-/*************************/
-/* anthropic api request */
-
-export async function AnthropicChat(): Promise<AnthropicChatMessage> {
-  let fullContent = "";
-  const message = anthropic.messages
-    .stream({
-      model: model,
-      max_tokens: 1024,
-      system: system,
-      messages: anthropicHistory,
-    })
-    .on("text", (text) => {
-      process.stdout.write(`${text}`);
-      fullContent += text;
-    });
-  await message.finalMessage();
-  process.stdout.write(`\n`);
-  return {
-    role: "assistant",
-    content: fullContent,
-  };
-}
-
 /**********************/
 /* google api request */
 
 export async function GoogleChat(): Promise<GoogleChatMessage> {
-  console.log("1");
   const response = await google.models.generateContentStream({
     model: model,
     config: {
@@ -258,7 +215,6 @@ export async function GoogleChat(): Promise<GoogleChatMessage> {
     process.stdout.write(`${chunk.text}`);
     fullContent += chunk.text;
   }
-  // process.stdout.write(`\n`);
   return {
     role: "model",
     parts: [{ text: fullContent }],
@@ -269,7 +225,7 @@ export async function GoogleChat(): Promise<GoogleChatMessage> {
 /* copy to clipboard */
 
 function copyToClipboard() {
-  const merged = [...openAIHistory, ...anthropicHistory, ...googleHistory];
+  const merged = [...openAIHistory, ...googleHistory];
   const text = JSON.stringify(merged, null, 2);
   switch (os.platform()) {
     case "darwin" /* macOS */:

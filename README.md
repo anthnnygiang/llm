@@ -7,22 +7,22 @@ Simple LLM CLI.\
 
 ## Features:
 
-- Interactive chat (OpenAI, Anthropic, Google)
+- Interactive chat (OpenAI, Google)
 - Output to clipboard
 - Multi-line input
 
 ## Requirements:
 
 - Node version >= `20`
-- Anthropic API key
 - OpenAI API key
+- Google Gemini API key
 
 ## Usage:
 
 1. Clone repo.
 2. Add
    - `export OPENAI_CLI="12345"`,
-   - `export ANTHROPIC_CLI="12345"`,
+   - `export GOOGLE_CLI="12345"`,
    - and `export GOOGLE_CLI="12345"` to `.zshrc` or `.zlogin`.
 3. `$ npm run build` to build the JS file
 4. `$ npm link`
@@ -38,4 +38,4 @@ Simple LLM CLI.\
 ## Development:
 
 - `$ npm run dev` to run in dev mode with `tsc --watch`.
-- `$ npm run build` to build.
+- `$ npm run format` to format code.
