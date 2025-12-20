@@ -177,7 +177,7 @@ async function chat() {
 /**********************/
 /* openai api request */
 
-export async function OpenAIChat(): Promise<OpenAIChatMessage> {
+async function OpenAIChat(): Promise<OpenAIChatMessage> {
   const stream = await openai.responses.create({
     instructions: system,
     model: model,
@@ -188,11 +188,14 @@ export async function OpenAIChat(): Promise<OpenAIChatMessage> {
   for await (const event of stream) {
     if (event.type === "response.output_text.delta") {
       const chunk = event.delta;
-      process.stdout.write(`${chunk}`);
+      for (const char of chunk) {
+        process.stdout.write(`${char}`);
+        await sleep(1); // smooth typing effect
+      }
       fullContent += chunk;
     }
   }
-  process.stdout.write(`\n`);
+  process.stdout.write(`\n`); // prompt will overwrite last line otherwise
   return {
     role: "assistant",
     content: fullContent,
@@ -202,7 +205,7 @@ export async function OpenAIChat(): Promise<OpenAIChatMessage> {
 /**********************/
 /* google api request */
 
-export async function GoogleChat(): Promise<GoogleChatMessage> {
+async function GoogleChat(): Promise<GoogleChatMessage> {
   const response = await google.models.generateContentStream({
     model: model,
     config: {
@@ -212,9 +215,16 @@ export async function GoogleChat(): Promise<GoogleChatMessage> {
   });
   let fullContent = "";
   for await (const chunk of response) {
-    process.stdout.write(`${chunk.text}`);
+    if (!chunk.text) {
+      continue;
+    }
+    for (const char of chunk.text) {
+      process.stdout.write(`${char}`);
+      await sleep(1); // smooth typing effect
+    }
     fullContent += chunk.text;
   }
+  process.stdout.write(`\n`); // prompt will overwrite last line otherwise
   return {
     role: "model",
     parts: [{ text: fullContent }],
@@ -251,4 +261,9 @@ function getEnv(key: string): string {
     process.exit(1);
   }
   return val;
+}
+
+/* Sleep for some time */
+async function sleep(ms: number) {
+  return new Promise((res) => setTimeout(res, ms));
 }
