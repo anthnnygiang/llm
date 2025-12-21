@@ -72,7 +72,7 @@ function initialize() {
 
 const userPrompt = chalk.cyan("? ");
 const llmPrompt = chalk.green("> ");
-const breakPrompt = chalk.green(">---\n");
+const breakPrompt = chalk.green("--------\n");
 const smoothDelay = 2; /* ms delay for smooth typing effect */
 const rl = readline.createInterface({
   input: process.stdin,
