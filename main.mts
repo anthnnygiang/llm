@@ -150,7 +150,7 @@ rl.on("line", async (line) => {
   rl.prompt();
 }).on("close", () => {
   /* ctrl-c/d */
-  process.stdout.write(`\n${chalk("system:")} prompt finished\n`);
+  process.stdout.write(`\n${chalk("system:")} done\n`);
   process.exit(0);
 });
 
@@ -177,7 +177,7 @@ async function chat() {
       googleHistory.push(googleResponse);
       break;
     default:
-      process.stdout.write(`${chalk.yellow("system:")} model not found\n`);
+      process.stdout.write(`${chalk.red("error:")} model provider not found\n`);
       process.exit(1);
   }
   process.stdout.write(breakPrompt); // spacing
@@ -275,7 +275,7 @@ function copyToClipboard() {
       spawnSync("clip", { input: text });
       break;
     default:
-      process.stdout.write(`${chalk.yellow("system:")} unsupported platform\n`);
+      process.stdout.write(`${chalk.red("error:")} unsupported platform\n`);
   }
 }
 
