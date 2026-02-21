@@ -294,10 +294,3 @@ function getEnv(key: string): string {
 async function sleep(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
-
-function logs(message: string) {
-  if (!debug) {
-    return;
-  }
-  process.stderr.write(`${chalk.gray("log:")} ${message}\n`);
-}
